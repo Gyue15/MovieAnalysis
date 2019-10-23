@@ -51,7 +51,7 @@
   "online_month_box":线上票房，当月(long),
   }
 
-* collection: film_box
+* collection: film_box // 可能需要大表？
   {
   "name": 电影名称(string),
   "total_box":总票房(long),
@@ -70,11 +70,10 @@
   {
   “time”: 日期(string, yyyy-MM)
   "location": 电影产地(string),
-  "total_month_box":总票房，当月(long),
-  "online_month_box":线上票房，当月(long),
+  "box_percent": 该产地票房占送票房比例，当月(double),
   }
-
-* collection: actor_box
+  
+* collection: actor_box // 可能需要大表？
   {
   “time”: 日期(string, yyyy)
   "actor": 演员名称(string),
