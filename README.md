@@ -46,65 +46,65 @@
 
 * collection: total_box
 {
-  “time”: 日期(string,  yyyy-MM)
-  "total_month_box":总票房，当月(long),
-  "online_month_box":线上票房，当月(long),
+&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
+&emsp;&emsp;"total_month_box":总票房，当月(long),
+&emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
 * collection: film_box
 {
-  "time": 日期(string, yyyy-MM)
-  "name": 电影名称(string),
-  "total_box":总票房，从该电影上映时到time为止(long),
-  "online_box":线上票房(long),
+&emsp;&emsp;"time": 日期(string, yyyy-MM)
+&emsp;&emsp;"name": 电影名称(string),
+&emsp;&emsp;"total_box":总票房，从该电影上映时到time为止(long),
+&emsp;&emsp;"online_box":线上票房(long),
 }
 
 * collection: type_box
 {
-  “time”: 日期(string,  yyyy-MM)
-  "type": 电影类型(string),
-  "total_month_box":总票房，当月(long),
-  "online_month_box":线上票房，当月(long),
+&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
+&emsp;&emsp;"type": 电影类型(string),
+&emsp;&emsp;"total_month_box":总票房，当月(long),
+&emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
 * collection: location_box
 {
-  “time”: 日期(string,  yyyy-MM)
-  "location": 电影产地(string),
-  "box_percent": 该产地票房占送票房比例，当月(double),
+&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
+&emsp;&emsp;"location": 电影产地(string),
+&emsp;&emsp;"box_percent": 该产地票房占送票房比例，当月(double),
 }
 * collection: actor_box // 可能需要大表？
 {
-  “time”: 日期(string,  yyyy)
-  "actor": 演员名称(string),
-  "total_year_box":总票房，当年(long),
-  "online_year_box":线上票房，当年(long),
+&emsp;&emsp;“time”: 日期(string,  yyyy)
+&emsp;&emsp;"actor": 演员名称(string),
+&emsp;&emsp;"total_year_box":总票房，当年(long),
+&emsp;&emsp;"online_year_box":线上票房，当年(long),
 }
 * collection: province_box
 {
-  “time”: 日期(string,  yyyy-MM)
-  "province": 省份名称(string),
-  "total_month_box":总票房，当月(long),
-  "online_month_box":线上票房，当月(long),
+&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
+&emsp;&emsp;"province": 省份名称(string),
+&emsp;&emsp;"total_month_box":总票房，当月(long),
+&emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
 
 ## 输入数据格式：
 
 * collection: film_stream
 {
-  "time": (string, yyyy-MM-dd),
-  "movie_name": (string),
-  "total_box": (long),
-  "online_box": (long),
-  "location": (string),
-  "actors": [(string), ...],
-  "type": [(string), ...],
+&emsp;&emsp;"time": (string, yyyy-MM-dd),
+&emsp;&emsp;"movie_name": (string),
+&emsp;&emsp;"total_box": (long),
+&emsp;&emsp;"online_box": (long),
+&emsp;&emsp;"location": (string),
+&emsp;&emsp;"actors": [(string), ...],
+&emsp;&emsp;"type": [(string), ...],
 }
 
 * collection: area_stream
 {
-  "time": (string, yyyy-MM-dd),
-  "province_id": (int)
-  "province": (string),
-  "box": (int)
+&emsp;&emsp;"time": (string, yyyy-MM-dd),
+&emsp;&emsp;"province_id": (int)
+&emsp;&emsp;"province": (string),
+&emsp;&emsp;"box": (int)
 }
 
 
