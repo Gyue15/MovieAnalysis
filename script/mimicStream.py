@@ -6,7 +6,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import os
 
-
 myclient = pymongo.MongoClient('mongodb://localhost:27017/')
 # myclient = pymongo.MongoClient('mongodb://172.19.240.38:27017/')
 myspider = myclient["sparkpractise"]
@@ -42,10 +41,10 @@ client = InsecureClient("http://localhost:9870", user='shea')
 
 pattern = '%Y-%m-%d'
 beginStr = "2011-11-01"
-beginTime = datetime.datetime.strptime(beginStr,pattern)
+beginTime = datetime.datetime.strptime(beginStr, pattern)
 endStr = "2019-11-01"
-endTime = datetime.datetime.strptime(endStr,pattern)
-totalMonths = (endTime.year-beginTime.year)*12+endTime.month-beginTime.month
+endTime = datetime.datetime.strptime(endStr, pattern)
+totalMonths = (endTime.year - beginTime.year) * 12 + endTime.month - beginTime.month
 nextTime = beginTime
 nextStr = nextTime.strftime(pattern)
 
@@ -57,24 +56,22 @@ for mon in range(13):
     nextStr = nextTime.strftime(pattern)
     print(nextStr)
     items = []
-    for movie in movieCollection.find({'time':{'$gte': beginStr,'$lt':nextStr}},{ "_id": 0 }):
+    for movie in movieCollection.find({'time': {'$gte': beginStr, '$lt': nextStr}}, {"_id": 0}):
         items.append(movie)
         # print(movie)
     print(len(items))
     jsonStr = json.dumps(items)
     str = beginTime.strftime('%Y-%m')
-    f = open('file/'+str + ".txt", mode='w')
+    f = open('file/' + str + ".txt", mode='w')
     f.write(jsonStr)
     f.close()
-    client.upload("streamInput",'file/'+str + ".txt")
-    os.remove('file/'+str + ".txt")
+    client.upload("streamInput", 'file/' + str + ".txt")
+    os.remove('file/' + str + ".txt")
     beginTime = nextTime
     beginStr = nextStr
     after0 = time.time()
-    print(after0-before0)
+    print(after0 - before0)
     time.sleep(1)
     # time.sleep(0.6)
 after = time.time()
 # print(after-before)
-
-
