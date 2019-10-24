@@ -1,13 +1,14 @@
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by shea on 2019/10/23.
  */
-public class FilmStream {
+public class FilmStream implements Serializable {
     String time;
     String movieName;
-    long totalBox;
-    long onlineBox;
+    Long totalBox;
+    Long onlineBox;
     String location;
     List<String> actors;
     List<String> type;
@@ -51,19 +52,19 @@ public class FilmStream {
         this.movieName = movieName;
     }
 
-    public long getTotalBox() {
+    public Long getTotalBox() {
         return totalBox;
     }
 
-    public void setTotalBox(long totalBox) {
+    public void setTotalBox(Long totalBox) {
         this.totalBox = totalBox;
     }
 
-    public long getOnlineBox() {
+    public Long getOnlineBox() {
         return onlineBox;
     }
 
-    public void setOnlineBox(long onlineBox) {
+    public void setOnlineBox(Long onlineBox) {
         this.onlineBox = onlineBox;
     }
 
