@@ -1,3 +1,3 @@
-movie-analysis/.idea/*
+*/.idea/*
 movie-analysis/*.iml
 movie-analysis/target/*
