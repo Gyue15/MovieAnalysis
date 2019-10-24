@@ -45,54 +45,51 @@
 ## 输出数据格式：
 
 * collection: total_box
-  {
-  “time”: 日期(string yyyy-MM)
+{
+  “time”: 日期(string,  yyyy-MM)
   "total_month_box":总票房，当月(long),
   "online_month_box":线上票房，当月(long),
-  }
-
-* collection: film_box // 可能需要大表？
-  {
+}
+* collection: film_box
+{
+  "time": 日期(string, yyyy-MM)
   "name": 电影名称(string),
-  "total_box":总票房(long),
+  "total_box":总票房，从该电影上映时到time为止(long),
   "online_box":线上票房(long),
-  }
+}
 
 * collection: type_box
-  {
-  “time”: 日期(string, yyyy-MM)
+{
+  “time”: 日期(string,  yyyy-MM)
   "type": 电影类型(string),
   "total_month_box":总票房，当月(long),
   "online_month_box":线上票房，当月(long),
-  }
-
+}
 * collection: location_box
-  {
-  “time”: 日期(string, yyyy-MM)
+{
+  “time”: 日期(string,  yyyy-MM)
   "location": 电影产地(string),
   "box_percent": 该产地票房占送票房比例，当月(double),
-  }
-  
+}
 * collection: actor_box // 可能需要大表？
-  {
-  “time”: 日期(string, yyyy)
+{
+  “time”: 日期(string,  yyyy)
   "actor": 演员名称(string),
   "total_year_box":总票房，当年(long),
   "online_year_box":线上票房，当年(long),
-  }
-
+}
 * collection: province_box
-  {
-  “time”: 日期(string, yyyy-MM)
+{
+  “time”: 日期(string,  yyyy-MM)
   "province": 省份名称(string),
   "total_month_box":总票房，当月(long),
   "online_month_box":线上票房，当月(long),
-  }
+}
 
 ## 输入数据格式：
 
 * collection: film_stream
-  {
+{
   "time": (string, yyyy-MM-dd),
   "movie_name": (string),
   "total_box": (long),
@@ -100,15 +97,15 @@
   "location": (string),
   "actors": [(string), ...],
   "type": [(string), ...],
-  }
+}
 
 * collection: area_stream
-  {
+{
   "time": (string, yyyy-MM-dd),
   "province_id": (int)
   "province": (string),
   "box": (int)
-  }
+}
 
 
 
