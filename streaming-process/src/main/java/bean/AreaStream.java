@@ -1,9 +1,11 @@
 package bean;
 
+import java.io.Serializable;
+
 /**
  * Created by shea on 2019/10/23.
  */
-public class AreaStream {
+public class AreaStream implements Serializable {
     String time;
     int provinceId;
     String province;

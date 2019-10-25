@@ -57,7 +57,6 @@
 &emsp;&emsp;"total_box":总票房，从该电影上映时到time为止(long),
 &emsp;&emsp;"online_box":线上票房(long),
 }
-
 * collection: type_box
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
@@ -82,8 +81,8 @@
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"province": 省份名称(string),
+&emsp;&emsp;"province_id": 省份id(int)
 &emsp;&emsp;"total_month_box":总票房，当月(long),
-&emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
 
 ## 输入数据格式：
