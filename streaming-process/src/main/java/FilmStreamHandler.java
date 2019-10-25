@@ -25,6 +25,22 @@ import java.util.*;
  */
 public class FilmStreamHandler {
 
+    private static Optional<Tuple3<Long, Long, String>> updateState(List<Tuple3<Long, Long, String>> currentValues,
+    Optional<Tuple3<Long, Long, String>> state) {
+        long online = 0;
+        long total = 0;
+        String month = currentValues.size() > 0 ? currentValues.get(0)._3() : "";
+        if (state.isPresent()) {
+            online = state.get()._1();
+            total = state.get()._2();
+        }
+        for (Tuple3<Long, Long, String> value : currentValues) {
+            online += value._1();
+            total += value._2();
+        }
+        return Optional.of(new Tuple3<>(online, total, month));
+    }
+
     private static void computeActorPerYear(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "boxPerActorPerYear");
@@ -46,22 +62,7 @@ public class FilmStreamHandler {
                 ).reduceByKeyAndWindow(
                         (a, b) -> new Tuple3<>(a._1() + b._1(), a._2() + b._2(), b._3()),
                         Durations.seconds(12), Durations.seconds(12)
-                ).updateStateByKey(
-                        (currentValues, state) -> {
-                            long online = 0;
-                            long total = 0;
-                            String month = currentValues.size() > 0 ? currentValues.get(0)._3() : "";
-                            if (state.isPresent()) {
-                                online = state.get()._1();
-                                total = state.get()._2();
-                            }
-                            for (Tuple3<Long, Long, String> value : currentValues) {
-                                online += value._1();
-                                total += value._2();
-                            }
-                            return Optional.of(new Tuple3<>(online, total, month));
-                        }
-                );
+                ).updateStateByKey(FilmStreamHandler::updateState);
         boxPerActorPerYear.print();
         boxPerActorPerYear.foreachRDD(pairRdd -> {
             JavaRDD<Document> documents = pairRdd
@@ -191,22 +192,7 @@ public class FilmStreamHandler {
 //        writeConfig.withOption("collection", "boxPerFilm");
         JavaPairDStream<String, Tuple3<Long, Long, String>> boxPerFilm = boxPerFilmPerMonth
                 .mapValues(v -> new Tuple3<>(v.getOnlineBox(), v.getTotalBox(), v.getTime())
-                ).updateStateByKey(
-                        (currentValues, state) -> {
-                            long online = 0;
-                            long total = 0;
-                            String month = currentValues.size() > 0 ? currentValues.get(0)._3() : "";
-                            if (state.isPresent()) {
-                                online = state.get()._1();
-                                total = state.get()._2();
-                            }
-                            for (Tuple3<Long, Long, String> value : currentValues) {
-                                online += value._1();
-                                total += value._2();
-                            }
-                            return Optional.of(new Tuple3<>(online, total, month));
-                        }
-                );
+                ).updateStateByKey(FilmStreamHandler::updateState);
         boxPerFilm.print(1);
         boxPerFilm.foreachRDD(
                 pairRdd -> {
