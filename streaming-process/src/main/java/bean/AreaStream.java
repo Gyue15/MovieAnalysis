@@ -1,3 +1,5 @@
+package bean;
+
 /**
  * Created by shea on 2019/10/23.
  */
