@@ -1,4 +1,3 @@
-import bean.FilmBox;
 import bean.FilmStream;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,45 +8,43 @@ import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.Optional;
-import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import org.apache.spark.util.LongAccumulator;
 import org.bson.Document;
 import scala.Tuple2;
 import scala.Tuple3;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ *
  * Created by shea on 2019/10/23.
  */
 public class FilmStreamHandler {
 
     private static void computeActorPerYear(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
-        Map<String, String> writeOverrides = new HashMap<String, String>();
+        Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "boxPerActorPerYear");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
-        JavaPairDStream<Tuple2<String, String>, Tuple3<Long, Long,String>> boxPerActorPerYear = boxPerFilmPerMonth
+        JavaPairDStream<Tuple2<String, String>, Tuple3<Long, Long, String>> boxPerActorPerYear = boxPerFilmPerMonth
                 .flatMapToPair(
                         element -> {
-                            List<Tuple2<Tuple2<String, String>, Tuple3<Long, Long,String>>> res = new ArrayList<>();
+                            List<Tuple2<Tuple2<String, String>, Tuple3<Long, Long, String>>> res = new ArrayList<>();
                             long onlineBox = element._2().getOnlineBox();
                             long totalBox = element._2().getTotalBox();
                             String month = element._2().getTime();
                             String year = element._2().getTime().substring(0, 4);
                             for (int i = 0; i < element._2().getActors().size(); i++) {
-                                res.add(new Tuple2<>(new Tuple2<>(element._2().getActors().get(i), year), new Tuple3<>(onlineBox, totalBox,month)));
+                                res.add(new Tuple2<>(new Tuple2<>(element._2().getActors().get(i), year), new Tuple3<>(onlineBox, totalBox, month)));
                             }
                             return res.iterator();
                         }
                 ).reduceByKeyAndWindow(
-                        (a, b) -> new Tuple3<>(a._1() + b._1(), a._2() + b._2(),b._3()),
+                        (a, b) -> new Tuple3<>(a._1() + b._1(), a._2() + b._2(), b._3()),
                         Durations.seconds(12), Durations.seconds(12)
                 ).updateStateByKey(
                         (currentValues, state) -> {
@@ -67,23 +64,24 @@ public class FilmStreamHandler {
                 );
         boxPerActorPerYear.print();
         boxPerActorPerYear.foreachRDD(pairRdd -> {
-            JavaRDD<Document> documents = pairRdd.map(t -> {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("actor", t._1()._1());
-                jsonObject.put("time", t._1()._2());
-                jsonObject.put("month", t._2()._3());
-                jsonObject.put("total_year_box", t._2()._2());
-                jsonObject.put("online_year_box", t._2()._1());
-                Document document = Document.parse(jsonObject.toJSONString());
-                return document;
-            });
+            JavaRDD<Document> documents = pairRdd
+                    .filter(t -> t._2()._3().length() > 0)
+                    .map(t -> {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("actor", t._1()._1());
+                        jsonObject.put("time", t._1()._2());
+                        jsonObject.put("month", t._2()._3());
+                        jsonObject.put("total_year_box", t._2()._2());
+                        jsonObject.put("online_year_box", t._2()._1());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
             MongoSpark.save(documents, writeConfig);
         });
 
     }
 
     private static JavaPairDStream<String, Tuple2<Long, Long>> computeBoxPerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
-        Map<String, String> writeOverrides = new HashMap<String, String>();
+        Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "boxPerMonth");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
@@ -96,14 +94,14 @@ public class FilmStreamHandler {
                 ).cache();
         boxPerMonth.print();
         boxPerMonth.foreachRDD(pairRdd -> {
-            JavaRDD<Document> documents = pairRdd.map(t -> {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("time", t._1());
-                jsonObject.put("online_month_box", t._2()._1());
-                jsonObject.put("total_month_box", t._2()._2());
-                Document document = Document.parse(jsonObject.toJSONString());
-                return document;
-            });
+            JavaRDD<Document> documents = pairRdd
+                    .map(t -> {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("time", t._1());
+                        jsonObject.put("online_month_box", t._2()._1());
+                        jsonObject.put("total_month_box", t._2()._2());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
             MongoSpark.save(documents, writeConfig);
         });
         return boxPerMonth;
@@ -111,7 +109,7 @@ public class FilmStreamHandler {
     }
 
     private static void computeLocationRatePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext, JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth) {
-        Map<String, String> writeOverrides = new HashMap<String, String>();
+        Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "locationRatePerMonth");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
@@ -125,14 +123,14 @@ public class FilmStreamHandler {
                 ).join(boxPerMonth);
         JavaPairDStream<String, Tuple3<Double, Double, String>> locationRatePerMonth = temp
                 .mapToPair(
-                        element->{
+                        element -> {
                             String filmName = element._2()._1()._3();
                             String month = element._1();
                             Long onlineOfFilm = element._2()._1()._1();
                             Long totalOfFilm = element._2()._1()._2();
-                            Double onlineOfMonth = (double)element._2()._2()._1();
-                            Double totalOfMonth = (double)element._2()._2()._2();
-                            return new Tuple2<>(filmName,new Tuple3<>(onlineOfFilm/onlineOfMonth,totalOfFilm/totalOfMonth,month));
+                            Double onlineOfMonth = (double) element._2()._2()._1();
+                            Double totalOfMonth = (double) element._2()._2()._2();
+                            return new Tuple2<>(filmName, new Tuple3<>(onlineOfFilm / onlineOfMonth, totalOfFilm / totalOfMonth, month));
                         }
                 );
         locationRatePerMonth.print();
@@ -143,8 +141,7 @@ public class FilmStreamHandler {
                         jsonObject.put("location", t._1());
                         jsonObject.put("time", t._2()._3());
                         jsonObject.put("box_percent", t._2()._2());
-                        Document document = Document.parse(jsonObject.toJSONString());
-                        return document;
+                        return Document.parse(jsonObject.toJSONString());
                     });
                     MongoSpark.save(documents, writeConfig);
                 }
@@ -152,7 +149,7 @@ public class FilmStreamHandler {
     }
 
     private static void computeBoxPerTypePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
-        Map<String, String> writeOverrides = new HashMap<String, String>();
+        Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "boxPerTypePerMonth");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
@@ -177,30 +174,27 @@ public class FilmStreamHandler {
             JavaRDD<Document> documents = pairRdd.map(t -> {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("type", t._1());
-//                jsonObject.put("time", month.value());
                 jsonObject.put("time", t._2()._3());
                 jsonObject.put("total_month_box", t._2()._2());
                 jsonObject.put("online_month_box", t._2()._1());
-                Document document = Document.parse(jsonObject.toJSONString());
-                return document;
+                return Document.parse(jsonObject.toJSONString());
             });
             MongoSpark.save(documents, writeConfig);
         });
     }
 
     private static void computeBoxPerFilm(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
-        Map<String, String> writeOverrides = new HashMap<String, String>();
+        Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "boxPerFilm");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
 //        writeConfig.withOption("collection", "boxPerFilm");
         JavaPairDStream<String, Tuple3<Long, Long, String>> boxPerFilm = boxPerFilmPerMonth
-                .mapValues(v -> {
-                    return new Tuple3<>(v.getOnlineBox(), v.getTotalBox(), v.getTime());
-                }).updateStateByKey(
+                .mapValues(v -> new Tuple3<>(v.getOnlineBox(), v.getTotalBox(), v.getTime())
+                ).updateStateByKey(
                         (currentValues, state) -> {
-                            long online = 0l;
-                            long total = 0l;
+                            long online = 0;
+                            long total = 0;
                             String month = currentValues.size() > 0 ? currentValues.get(0)._3() : "";
                             if (state.isPresent()) {
                                 online = state.get()._1();
@@ -216,15 +210,16 @@ public class FilmStreamHandler {
         boxPerFilm.print(1);
         boxPerFilm.foreachRDD(
                 pairRdd -> {
-                    JavaRDD<Document> documents = pairRdd.map(t -> {
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("name", t._1());
-                        jsonObject.put("time", t._2()._3());
-                        jsonObject.put("total_box", t._2()._2());
-                        jsonObject.put("online_box", t._2()._1());
-                        Document document = Document.parse(jsonObject.toJSONString());
-                        return document;
-                    });
+                    JavaRDD<Document> documents = pairRdd
+                            .filter(t -> t._2()._3().length() > 0)
+                            .map(t -> {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("name", t._1());
+                                jsonObject.put("time", t._2()._3());
+                                jsonObject.put("total_box", t._2()._2());
+                                jsonObject.put("online_box", t._2()._1());
+                                return Document.parse(jsonObject.toJSONString());
+                            });
                     MongoSpark.save(documents, writeConfig);
                 }
         );
@@ -258,10 +253,9 @@ public class FilmStreamHandler {
                     }
                     return res.iterator();
                 }).filter(
-                        filmStream -> {
-                            return filmStream.getTotalBox() != null && filmStream.getOnlineBox() != null
-                                    && filmStream.getOnlineBox() <= filmStream.getTotalBox();
-                        }
+                        filmStream -> filmStream.getTotalBox() != null && filmStream.getOnlineBox() != null
+                                && filmStream.getOnlineBox() <= filmStream.getTotalBox()
+
                 ).mapToPair(
                         filmStream -> {
                             filmStream.setTime(filmStream.getTime().substring(0, 7));
@@ -271,16 +265,14 @@ public class FilmStreamHandler {
         JavaPairDStream<String, FilmStream> boxPerFilmPerMonth = computeBoxPerFilmPerMonth(perFilmPerMonth);
         computeBoxPerFilm(boxPerFilmPerMonth, sparkContext);
         computeBoxPerTypePerMonth(boxPerFilmPerMonth, sparkContext);
-        JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth = computeBoxPerMonth(boxPerFilmPerMonth,sparkContext);
-        computeLocationRatePerMonth(boxPerFilmPerMonth, sparkContext,boxPerMonth);
-        computeActorPerYear(boxPerFilmPerMonth,sparkContext);
+        JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth = computeBoxPerMonth(boxPerFilmPerMonth, sparkContext);
+        computeLocationRatePerMonth(boxPerFilmPerMonth, sparkContext, boxPerMonth);
+        computeActorPerYear(boxPerFilmPerMonth, sparkContext);
         streamingContext.start();              // Start the computation
         try {
             streamingContext.awaitTermination();   // Wait for the computation to terminate
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-//            sparkContext.close();
         }
 
     }
