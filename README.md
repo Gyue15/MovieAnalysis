@@ -44,40 +44,40 @@
 
 ## 输出数据格式：
 
-* collection: total_box
+* collection: total_box（返回全部数据），图3
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"total_month_box":总票房，当月(long),
 &emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
-* collection: film_box
+* collection: film_box（name相同时返回time最大的数据），图1
 {
 &emsp;&emsp;"time": 日期(string, yyyy-MM)
 &emsp;&emsp;"name": 电影名称(string),
 &emsp;&emsp;"total_box":总票房，从该电影上映时到time为止(long),
 &emsp;&emsp;"online_box":线上票房(long),
 }
-* collection: type_box
+* collection: type_box（type相同时返回time最大的数据），图2
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"type": 电影类型(string),
 &emsp;&emsp;"total_month_box":总票房，当月(long),
 &emsp;&emsp;"online_month_box":线上票房，当月(long),
 }
-* collection: location_box
+* collection: location_box（返回全部数据），图4
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"location": 电影产地(string),
 &emsp;&emsp;"box_percent": 该产地票房占送票房比例，当月(double),
 }
-* collection: actor_box // 可能需要大表？
+* collection: actor_box（返回actor与time的yyyy部分不同的，两个字段均相同时返回time最大的数据），图6
 {
-&emsp;&emsp;“time”: 日期(string,  yyyy)
+&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"actor": 演员名称(string),
 &emsp;&emsp;"total_year_box":总票房，当年(long),
 &emsp;&emsp;"online_year_box":线上票房，当年(long),
 }
-* collection: province_box
+* collection: province_box（province相同时返回time不同的数据），图5
 {
 &emsp;&emsp;“time”: 日期(string,  yyyy-MM)
 &emsp;&emsp;"province": 省份名称(string),
