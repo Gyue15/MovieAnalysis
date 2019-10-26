@@ -74,7 +74,7 @@ public class AreaStreamHandler {
                 .appName("StreamingProcess")
                 .config("spark.mongodb.output.uri", "mongodb://localhost:27017/")
                 .config("spark.mongodb.output.database", "sparkpractise")
-                .config("spark.mongodb.output.collection", "provinceBoxPerMonth")
+                .config("spark.mongodb.output.collection", "area_box")
                 .getOrCreate();
 //        SparkConf sparkConf = new SparkConf().setAppName("myStreaming");
 //        JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);

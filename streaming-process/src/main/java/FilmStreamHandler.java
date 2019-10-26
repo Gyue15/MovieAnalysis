@@ -43,7 +43,7 @@ public class FilmStreamHandler {
 
     private static void computeActorPerYear(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
-        writeOverrides.put("collection", "boxPerActorPerYear");
+        writeOverrides.put("collection", "actor_box");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<Tuple2<String, String>, Tuple3<Long, Long, String>> boxPerActorPerYear = boxPerFilmPerMonth
@@ -80,7 +80,7 @@ public class FilmStreamHandler {
 
     private static JavaPairDStream<String, Tuple2<Long, Long>> computeBoxPerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
-        writeOverrides.put("collection", "boxPerMonth");
+        writeOverrides.put("collection", "total_box");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth = boxPerFilmPerMonth
@@ -108,7 +108,7 @@ public class FilmStreamHandler {
 
     private static void computeLocationRatePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext, JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth) {
         Map<String, String> writeOverrides = new HashMap<>();
-        writeOverrides.put("collection", "locationRatePerMonth");
+        writeOverrides.put("collection", "location_box");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<String, Tuple3<Long, Long, String>> perLocationPerMonth = boxPerFilmPerMonth
@@ -148,7 +148,7 @@ public class FilmStreamHandler {
 
     private static void computeBoxPerTypePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
-        writeOverrides.put("collection", "boxPerTypePerMonth");
+        writeOverrides.put("collection", "type_box");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
 //        writeConfig.withOption("collection", "boxPerTypePerMonth");
@@ -183,7 +183,7 @@ public class FilmStreamHandler {
 
     private static void computeBoxPerFilm(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
-        writeOverrides.put("collection", "boxPerFilm");
+        writeOverrides.put("collection", "film_box");
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
 //        writeConfig.withOption("collection", "boxPerFilm");
@@ -225,7 +225,7 @@ public class FilmStreamHandler {
 
     private static void receiveStream(JavaSparkContext sparkContext) {
         JavaStreamingContext streamingContext = new JavaStreamingContext(sparkContext, Durations.seconds(1));
-        JavaDStream<String> contentList = streamingContext.textFileStream("streamInput/");
+        JavaDStream<String> contentList = streamingContext.textFileStream("streamInput/film");
         streamingContext.checkpoint("checkPoint/");
         JavaPairDStream<String, FilmStream> perFilmPerMonth = contentList
                 .flatMap(content -> {
