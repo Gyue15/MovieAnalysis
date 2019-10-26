@@ -70,9 +70,10 @@
 &emsp;&emsp;"location": 电影产地(string),
 &emsp;&emsp;"box_percent": 该产地票房占送票房比例，当月(double),
 }
-* collection: actor_box（返回actor与time的yyyy部分不同的，两个字段均相同时返回time最大的数据），图6
+* collection: actor_box（返回actor与year不同的，两个字段均相同时返回month最大的），图6
 {
-&emsp;&emsp;“time”: 日期(string,  yyyy-MM)
+&emsp;&emsp;“month”: 月(string,  yyyy-MM)
+&emsp;&emsp;"time": 年(string,  yyyy)
 &emsp;&emsp;"actor": 演员名称(string),
 &emsp;&emsp;"total_year_box":总票房，当年(long),
 &emsp;&emsp;"online_year_box":线上票房，当年(long),
