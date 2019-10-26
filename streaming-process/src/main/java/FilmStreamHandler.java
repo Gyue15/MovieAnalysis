@@ -59,9 +59,6 @@ public class FilmStreamHandler {
                             }
                             return res.iterator();
                         }
-                ).reduceByKeyAndWindow(
-                        (a, b) -> new Tuple3<>(a._1() + b._1(), a._2() + b._2(), b._3()),
-                        Durations.seconds(12), Durations.seconds(12)
                 ).updateStateByKey(FilmStreamHandler::updateState);
         boxPerActorPerYear.print();
         boxPerActorPerYear.foreachRDD(pairRdd -> {
