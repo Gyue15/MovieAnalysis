@@ -26,6 +26,22 @@ const film_box =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('film_box');
+        
+        //var max = collection.
+        //collection.aggregate([
+        //    {
+        //        '$match': {
+        //            'time': {
+        //                '$gte': max
+        //            }
+        //        }
+        //    }
+        //]).toArray(function(err, docs) {
+        //    assert.equal(err, null);
+        //    callback(docs);
+        //    client.close();
+        //});
+        
         collection.aggregate([
             {
                 '$sort': {'time': -1}
@@ -125,8 +141,16 @@ const location_box =  function(callback){
         const collection = db.collection('location_box');
         collection.find().sort({"time": 1}).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
     });
 }
@@ -143,11 +167,26 @@ const pic5 =  function(callback){
         //该图对应的collection
                 
         // 以下代码根据不同功能重新实现
-        const collection = db.collection('province_box');
-        collection.find().toArray(function(err, docs) {
+        const collection = db.collection('area_box');
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$limit': 1    
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            console.log(docs + JSON.stringify(docs));
+            var newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
     });
 }

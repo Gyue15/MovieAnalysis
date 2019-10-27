@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>电影大盘线上与线下总票房统计图</title>
+    <!-- 引入 echarts.js -->
+    <!-- 这里是加载刚下好的echarts.min.js，注意路径 -->
+    <script src="echarts.js"></script>
+    <script src="jquery-3.4.1.min.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1200;height:600px;"></div>
+    
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        
+        var date = [];
+        var total_month_box = [];
+        var online_month_box = [];
+        getData(picInit);     
+        
+        var option;
+        
+        function getData(callback){
+            jQuery.ajax({
+                url: "http://192.168.1.200:8888/3", //url 必须写在这里 不然chrome会报CORS error
+                type: "get",
+                dataType: "text",
+                async: true,
+                error : function(req, message) {
+                    alert(JSON.stringify(req) + message);
+                },
+                success: function(ret){
+                    console.log("returnData:" + ret);//数据成功获取
+                    var data = JSON.parse(ret);
+                    date.push(data[0].time);
+                    total_month_box.push(data[0].total_month_box);
+                    online_month_box.push(data[0].online_month_box);
+                    if (date.length == 150) {
+                        date.shift();//shift() 方法用于把数组的第一个元素从其中删除，并返回第一个元素的值。
+                        total_month_box.shift();
+                        online_month_box.shift();
+                    }
+
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                }
+            });
+        }
+
+        function picInit(){
+            option = {
+                title: {
+                    text: '演员年数据 变化图'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'cross'       
+                    }
+                },
+                legend: {
+                    data:['总票房','线上票房']
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: date
+                },
+                yAxis: {
+                    boundaryGap: [0, '50%'],
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name:'总票房',
+                        type:'line',
+                        symbol: 'none',
+                        data: total_month_box
+                    },
+                    {
+                        name:'线上票房',
+                        type:'line',
+                        symbol: 'none',
+                        data: online_month_box
+                    }
+                ]
+            };
+
+            //刷新数据
+            setInterval(function () {
+                getData();
+                myChart.setOption({
+                    xAxis: {
+                        data: date
+                    },
+                    series: [
+                        {
+                            name:'总票房',
+                            data: total_month_box
+                        },
+                        {
+                            name:'线上票房',
+                            data: online_month_box
+                        }
+                    ]
+                });
+            }, 500);
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+       }
+    </script>
+
+</body>
+</html>

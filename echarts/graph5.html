@@ -1,0 +1,168 @@
+<!--测试 jquery -->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>中国省份票房地图</title>
+    <script src="echarts.js" ></script>
+    <script src="china.js" ></script>
+    <script src="jquery-3.4.1.min.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1000px;height:600px;"></div>
+</body>
+
+<script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+        var mydata = [  
+            {name: '北京',value: 0 },{name: '天津',value: 0 },  
+            {name: '上海',value: 0 },{name: '重庆',value: 0 },  
+            {name: '河北',value: 0 },{name: '河南',value: 0 },  
+            {name: '云南',value: 0 },{name: '辽宁',value: 0 },  
+            {name: '黑龙江',value: 0 },{name: '湖南',value: 0 },  
+            {name: '安徽',value: 0 },{name: '山东',value: 0 },  
+            {name: '新疆',value: 0 },{name: '江苏',value: 0 },  
+            {name: '浙江',value: 0 },{name: '江西',value: 0 },  
+            {name: '湖北',value: 0 },{name: '广西',value: 0 },  
+            {name: '甘肃',value: 0 },{name: '山西',value: 0 },  
+            {name: '内蒙古',value: 0 },{name: '陕西',value: 0 },  
+            {name: '吉林',value: 0 },{name: '福建',value: 0 },  
+            {name: '贵州',value: 0 },{name: '广东',value: 0 },  
+            {name: '青海',value: 0 },{name: '西藏',value: 0 },  
+            {name: '四川',value: 0 },{name: '宁夏',value: 0 },  
+            {name: '海南',value: 0 },{name: '台湾',value: 0 },  
+            {name: '香港',value: 0 },{name: '澳门',value: 0 }  
+        ]; 
+        getData(picInit);
+        
+        var option;
+        
+        function getData(callback){
+            jQuery.ajax({
+                url: "http://192.168.1.200:8888/5", //url 必须写在这里 不然chrome会报CORS error
+                type: "get",
+                dataType: "text",
+                async: true,
+                error : function(req, message) {
+                    alert(JSON.stringify(req) + message);
+                },
+                success: function(ret){
+                    console.log("returnData:" + ret);//数据成功获取
+                    var data = JSON.parse(ret);
+                    map = {};
+                    for(var i = 0;i<data.length;i++){
+                        map[data[i].province] = data[i];
+                    }
+                    for(var i = 0;i<mydata.length;i++){
+                        switch(mydata[i].name){
+                            case "北京"   :mydata[i].value = map.北京市.total_month_box;break;
+                            case "宁夏"   :mydata[i].value = map.宁夏.total_month_box;break;
+                            case "上海"   :mydata[i].value = map.上海市.total_month_box     ;break;
+                            case "河北"   :mydata[i].value = map.河北省.total_month_box    ;break;
+                            case "云南"   :mydata[i].value = map.云南省.total_month_box    ;break;
+                            case "黑龙江" :mydata[i].value = map.黑龙江.total_month_box    ;break;
+                            case "安徽"   :mydata[i].value = map.安徽省.total_month_box    ;break;
+                            case "新疆"   :mydata[i].value = map.新疆.total_month_box    ;break;
+                            case "浙江"   :mydata[i].value = map.浙江省.total_month_box    ;break;
+                            case "湖北"   :mydata[i].value = map.湖北省.total_month_box    ;break;
+                            case "甘肃"   :mydata[i].value = map.甘肃省.total_month_box    ;break;
+                            case "内蒙古" :mydata[i].value = map.内蒙古.total_month_box    ;break;
+                            case "吉林"   :mydata[i].value = map.吉林省.total_month_box    ;break;
+                            case "贵州"   :mydata[i].value = map.贵州省.total_month_box    ;break;
+                            case "青海"   :mydata[i].value = map.青海省.total_month_box    ;break;
+                            case "四川"   :mydata[i].value = map.四川省.total_month_box    ;break;
+                            case "海南"   :mydata[i].value = map.海南省.total_month_box    ;break;
+                            case "天津"   :mydata[i].value = map.天津市.total_month_box    ;break;
+                            case "重庆"   :mydata[i].value = map.重庆市.total_month_box    ;break;
+                            case "河南"   :mydata[i].value = map.河南省.total_month_box    ;break;
+                            case "辽宁"   :mydata[i].value = map.辽宁省.total_month_box    ;break;
+                            case "湖南"   :mydata[i].value = map.湖南省.total_month_box    ;break;
+                            case "山东"   :mydata[i].value = map.山东省.total_month_box    ;break;
+                            case "江苏"   :mydata[i].value = map.江苏省.total_month_box    ;break;
+                            case "江西"   :mydata[i].value = map.江西省.total_month_box    ;break;
+                            case "广西"   :mydata[i].value = map.广西省.total_month_box    ;break;
+                            case "山西"   :mydata[i].value = map.山西省.total_month_box    ;break;
+                            case "陕西"   :mydata[i].value = map.陕西省.total_month_box    ;break;
+                            case "福建"   :mydata[i].value = map.福建省.total_month_box    ;break;
+                            case "广东"   :mydata[i].value = map.广东省.total_month_box    ;break;
+                            case "西藏"   :mydata[i].value = map.西藏.total_month_box    ;break;
+                            default: break;
+                        }
+                    }
+
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                }
+            });
+        }
+        
+        function picInit(){
+            option = {
+                backgroundColor: '#FFFFFF',  
+                title: {  
+                    text: '中国省份票房地图',  
+                    subtext: '',  
+                    x:'center'  
+                },  
+                tooltip : {  
+                    trigger: 'item'  
+                },  
+                
+                //左侧小导航图标
+                visualMap: {  
+                    show : true,  
+                    x: 'left',  
+                    y: 'center',  
+                    splitList: [   
+                        {start: 150000000, end:200000000},{start: 100000000, end: 150000000},  
+                        {start: 50000000, end: 100000000},{start: 30000000, end: 50000000},  
+                        {start: 10000000, end: 30000000},{start: 0, end: 10000000},  
+                    ],  
+                    color: ['#ff0000', '#ff6600', '#ffff00','#00ff00', '#00ffff', '#0000ff']  
+                },  
+                
+                //配置属性
+                series: [{  
+                    name: '数据',  
+                    type: 'map',  
+                    mapType: 'china',   
+                    roam: true,  
+                    label: {  
+                        normal: {  
+                            show: true  //省份名称  
+                        },  
+                        emphasis: {  
+                            show: false  
+                        }  
+                    },  
+                    data:mydata  //数据
+                }]
+            };
+
+            //刷新数据
+            //setInterval(function () {
+            //    getData();
+            //    myChart.setOption({
+            //        xAxis: {
+            //            data: date
+            //        },
+            //        series: [
+            //            {
+            //                name:'总票房',
+            //                data: total_month_box
+            //            },
+            //            {
+            //                name:'线上票房',
+            //                data: online_month_box
+            //            }
+            //        ]
+            //    });
+            //}, 500);
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+       }
+
+</script>
+</html>
