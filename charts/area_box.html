@@ -2,14 +2,14 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>中国省份票房地图</title>
+    <title>Area</title>
     <script src="echarts.js" ></script>
     <script src="china.js" ></script>
     <script src="jquery-3.4.1.min.js"></script>
 </head>
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1000px;height:600px;"></div>
+    <div id="main" style="width: 1000px;height:700px;"></div>
 </body>
 
 <script type="text/javascript">
@@ -36,22 +36,27 @@
         getData(picInit);
         
         var option;
+        var maxValue = 0;
+        var timeStr = '';
         
         function getData(callback){
             jQuery.ajax({
-                url: "http://192.168.1.200:8888/5", //url 必须写在这里 不然chrome会报CORS error
+                url: "http://localhost:8888/area_box", //url 必须写在这里 不然chrome会报CORS error
                 type: "get",
                 dataType: "text",
                 async: true,
                 error : function(req, message) {
-                    alert(JSON.stringify(req) + message);
+                    console.log(JSON.stringify(req) + message);
                 },
                 success: function(ret){
                     console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
                     map = {};
+                    maxValue = 0;
                     for(var i = 0;i<data.length;i++){
+                        timeStr = data[i]['time']
                         map[data[i].province] = data[i];
+                        maxValue = data[i]['total_month_box'] > maxValue ? data[i]['total_month_box'] : maxValue;
                     }
                     for(var i = 0;i<mydata.length;i++){
                         switch(mydata[i].name){
@@ -101,7 +106,7 @@
             option = {
                 backgroundColor: '#FFFFFF',  
                 title: {  
-                    text: '中国省份票房地图',  
+                    text: '中国省份票房地图 ' + timeStr,  
                     subtext: '',  
                     x:'center'  
                 },  
@@ -113,13 +118,10 @@
                 visualMap: {  
                     show : true,  
                     x: 'left',  
-                    y: 'center',  
-                    splitList: [   
-                        {start: 150000000, end:200000000},{start: 100000000, end: 150000000},  
-                        {start: 50000000, end: 100000000},{start: 30000000, end: 50000000},  
-                        {start: 10000000, end: 30000000},{start: 0, end: 10000000},  
-                    ],  
-                    color: ['#ff0000', '#ff6600', '#ffff00','#00ff00', '#00ffff', '#0000ff']  
+                    y: 'center', 
+                    min: 0,
+                    max: maxValue,
+                    text: [(maxValue / 100000000).toFixed(2) + "亿", '0'],
                 },  
                 
                 //配置属性
@@ -141,24 +143,40 @@
             };
 
             //刷新数据
-            //setInterval(function () {
-            //    getData();
-            //    myChart.setOption({
-            //        xAxis: {
-            //            data: date
-            //        },
-            //        series: [
-            //            {
-            //                name:'总票房',
-            //                data: total_month_box
-            //            },
-            //            {
-            //                name:'线上票房',
-            //                data: online_month_box
-            //            }
-            //        ]
-            //    });
-            //}, 500);
+            setInterval(function () {
+               getData();
+               myChart.setOption({
+                title: {  
+                    text: '中国省份票房地图 ' + timeStr,  
+                    subtext: '',  
+                    x:'center'  
+                },  
+                //左侧小导航图标
+                visualMap: {  
+                    show : true,  
+                    x: 'left',  
+                    y: 'center', 
+                    min: 0,
+                    max: maxValue,
+                    text: [(maxValue / 100000000).toFixed(2) + "亿", '0'],
+                }, 
+                series: [{  
+                    name: '数据',  
+                    type: 'map',  
+                    mapType: 'china',   
+                    roam: true,  
+                    label: {  
+                        normal: {  
+                            show: true  //省份名称  
+                        },  
+                        emphasis: {  
+                            show: false  
+                        }  
+                    },  
+                    data:mydata  //数据
+                }]
+               });
+            }, 500);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

@@ -136,7 +136,7 @@ public class FilmStreamHandler {
                 pairRdd -> {
                     JavaRDD<Document> documents = pairRdd.map(t -> {
                         JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("location", t._1());
+                        jsonObject.put("region", t._1());
                         jsonObject.put("time", t._2()._3());
                         jsonObject.put("box_percent", t._2()._2());
                         return Document.parse(jsonObject.toJSONString());

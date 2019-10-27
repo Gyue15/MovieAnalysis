@@ -39,26 +39,28 @@
                 },
                 success: function(ret){
                     location_dict = {"中国大陆": [], "中国香港": [], "美国": [], "印度": [], "日本": []}
+                    time = [];
                     var data = JSON.parse(ret);
+                    console.log(data);
                     if (data.length > 0) {
                         time_str = data[data.length - 1].time;
                     }
                     var last_time = '-';
                     var now_time = '--';
                     var len = 0
-                    for(var i = 0;i<data.length;i++){
+                    for(var i = 0; i<data.length; i++){
                         now_time =  data[i].time;
-                        location = data[i]['location'];
-                            if (location_list.indexOf(location)) {
-                                location_dict[location].push(data[i]['box_percent']);
-                            }
+                        region = data[i]['region'];
+                        if (location_list.indexOf(region) >= 0) {
+                            location_dict[region].push(data[i]['box_percent']);
+                        }
                         if (now_time != last_time) {
                             len++;
                             last_time = now_time;
                             time.push(now_time);
                             for (var key in location_dict) {
                                 if (location_dict[key].length < len) {
-                                    location_dict[key].push('')
+                                    location_dict[key].push(0)
                                 }
                             }
                         }

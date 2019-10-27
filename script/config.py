@@ -30,7 +30,7 @@ class Config(object):
     @staticmethod
     def get_config(conf, stream_type):
         mongo_client = pymongo.MongoClient(conf['mongo_client'])
-        database = mongo_client[conf['database']]
+        database = mongo_client["sparkpractise"]
         if stream_type == StreamType.FILM:
             database.drop_collection("actor_box")
             database.drop_collection("film_box")
@@ -39,6 +39,7 @@ class Config(object):
             database.drop_collection("type_box")
         else: 
             database.drop_collection("area_box")
+        database = mongo_client[conf['database']]
         collection = database[conf['film_collection' if stream_type == StreamType.FILM else 'area_collection']]
         hdfs_client = InsecureClient(conf['hdfs'], user=conf['user'])
         return collection, hdfs_client, "streamInput/film" if stream_type == StreamType.FILM else "streamInput/area"

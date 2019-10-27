@@ -141,16 +141,8 @@ const location_box =  function(callback){
         const collection = db.collection('location_box');
         collection.find().sort({"time": 1}).toArray(function(err, docs) {
             assert.equal(err, null);
-            newestDate = docs[0].time;
-            collection.aggregate([
-                {
-                    '$match': {'time':{'$gte': newestDate}}
-                }
-            ]).toArray(function(err, docs) {
-                assert.equal(err, null);
-                callback(docs);
-                client.close();
-            });
+            callback(docs);
+            client.close();
         });
     });
 }
@@ -159,7 +151,7 @@ const location_box =  function(callback){
 // @docs：  
 // [{"time":"2019-10","province":"北京","province_id":1,"total_month_box":121212},
 //  {"time":"2019-10","province":"天津","province_id":2,"total_month_box":121212},...]
-const pic5 =  function(callback){
+const area_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -175,15 +167,15 @@ const pic5 =  function(callback){
                 '$limit': 1    
             }
         ]).toArray(function(err, docs) {
-            assert.equal(err, null);
+            // assert.equal(err, null);
             console.log(docs + JSON.stringify(docs));
-            var newestDate = docs[0].time;
+            var newestDate = docs.length > 0 ?  docs[0].time : '';
             collection.aggregate([
                 {
                     '$match': {'time':{'$gte': newestDate}}
                 }
             ]).toArray(function(err, docs) {
-                assert.equal(err, null);
+                // assert.equal(err, null);
                 callback(docs);
                 client.close();
             });
@@ -195,7 +187,7 @@ const pic5 =  function(callback){
 // @docs：  
 // [{"time":"2019-10","actor":"张译","total_year_box":232323,"online_year_box":121212},
 //  {"time":"2019-10","actor":"吴京","total_year_box":232323,"online_year_box":121212},...]
-const pic6 =  function(callback){
+const actor =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -246,8 +238,8 @@ const myParseUrl = function(url,callback){
         case "location_box":
            location_box(function(ret){callback(ret);});
            break;
-        case 5:
-           pic5(function(ret){callback(ret);});
+        case "area_box":
+           area_box(function(ret){callback(ret);});
            break;
         case 6:
            pic6(function(ret){callback(ret);});
@@ -276,4 +268,11 @@ const server = http.createServer((request,response)=>{
 
 server.listen(port,hostname,()=>{ 
 	console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+process.on('uncaughtException', function (err) {
+    //打印出错误
+    console.log(err);
+    //打印出错误的调用栈方便调试
+    console.log(err.stack)
 });
