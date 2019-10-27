@@ -1,9 +1,14 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
+const http = require('http');   
+
+// const hostname ='192.168.1.200';
+const hostname ='172.19.117.184';
+const port = 8888;   
 
 // Connection URL
 // const url = 'mongodb://root:mongo_admin_czsA68g@192.168.1.200:27017';
-const url = 'mongodb://root:mongo_admin_czsA68g@172.19.164.103:27017';
+const url = 'mongodb://root:mongo_admin_czsA68g@172.19.117.184:27017';
 
 // Database Name
 const dbName = 'test';
@@ -21,15 +26,35 @@ const pic1 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('film_box');
-        collection.find().toArray(function(err, docs) {
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$group': {
+                    '_id': {'name': '$name'}, 
+                    'time': {'$first': '$time'}, 
+                    'total_box': {'$first': '$total_box'}, 
+                    'online_box': {'$first': '$online_box'}
+                }
+            }, {
+                '$sort': {
+                    'total_box': -1
+                }
+            }, {
+                '$limit': 20    //前20条
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
         });
     });
+
 }
 
 // 图2 柱图 该月 电影类型 数据   
+//type_box（type相同时返回time最大的数据），图2
+//      先根据type进行查找，type唯一且time最大； 再在子集合中选取total_month_box最大
 // @docs：  (降序排序)
 // [{"time":"2019-10","type":"动作","total_month_box":343434,"online_month_box":232323},
 //  {"time":"2019-10","type":"科幻","total_month_box":232323,"online_month_box":121212},...]
@@ -42,7 +67,24 @@ const pic2 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('type_box');
-        collection.find().toArray(function(err, docs) {
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$group': {
+                    '_id': {'type': '$type'}, 
+                    'time': {'$first': '$time'}, 
+                    'total_month_box': {'$first': '$total_month_box'}, 
+                    'online_month_box': {'$first': '$online_month_box'}
+                }
+            }, {
+                '$sort': {
+                    'total_month_box': -1
+                }
+            }, {
+                '$limit': 20    //前20条
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
@@ -125,7 +167,24 @@ const pic6 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('actor_box');
-        collection.find().toArray(function(err, docs) {
+        collection.aggregate([
+            {
+                '$sort': {'month': -1}
+            }, {
+                '$group': {
+                    '_id': {'actor': '$actor'}, 
+                    'time': {'$first': '$time'}, 
+                    'total_year_box': {'$first': '$total_year_box'}, 
+                    'online_year_box': {'$first': '$online_year_box'}
+                }
+            }, {
+                '$sort': {
+                    'total_year_box': -1  //结果降序
+                }
+            }, {
+                '$limit': 20    //前20条
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
@@ -159,17 +218,13 @@ const myParseUrl = function(url,callback){
     }
     
 }
-
-const http = require('http');   
-// const hostname ='192.168.1.200';  
-const hostname ='172.19.164.103';
-const port = 8888;          
+       
 
 const server = http.createServer((request,response)=>{
 	response.statusCode=200;
 	if(request.url!=='/favicon.ico'){
             response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+            response.setHeader("Access-Control-Allow-Headers", "Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild");
             response.setHeader("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
             response.setHeader('Content-Type','text/html;charset=utf-8');
 
