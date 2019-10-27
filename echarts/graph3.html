@@ -53,8 +53,14 @@
 
         function picInit(){
             option = {
+                title: {
+                    text: '演员年数据 变化图'
+                },
                 tooltip: {
-                    trigger: 'axis'
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'cross'       
+                    }
                 },
                 legend: {
                     data:['总票房','线上票房']

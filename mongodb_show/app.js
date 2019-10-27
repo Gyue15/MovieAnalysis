@@ -2,13 +2,13 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const http = require('http');   
 
-// const hostname ='192.168.1.200';
-const hostname ='172.19.117.184';
+const hostname ='192.168.1.200';
+// const hostname ='172.19.117.184';
 const port = 8888;   
 
 // Connection URL
-// const url = 'mongodb://root:mongo_admin_czsA68g@192.168.1.200:27017';
-const url = 'mongodb://root:mongo_admin_czsA68g@172.19.117.184:27017';
+const url = 'mongodb://root:mongo_admin_czsA68g@192.168.1.200:27017';
+// const url = 'mongodb://root:mongo_admin_czsA68g@172.19.117.184:27017';
 
 // Database Name
 const dbName = 'test';
@@ -26,6 +26,22 @@ const pic1 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('film_box');
+        
+        //var max = collection.
+        //collection.aggregate([
+        //    {
+        //        '$match': {
+        //            'time': {
+        //                '$gte': max
+        //            }
+        //        }
+        //    }
+        //]).toArray(function(err, docs) {
+        //    assert.equal(err, null);
+        //    callback(docs);
+        //    client.close();
+        //});
+        
         collection.aggregate([
             {
                 '$sort': {'time': -1}
@@ -104,7 +120,13 @@ const pic3 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('total_box');
-        collection.find().toArray(function(err, docs) {
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$limit': 1    
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
@@ -125,10 +147,25 @@ const pic4 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('location_box');
-        collection.find().toArray(function(err, docs) {
+        var newestDate;
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$limit': 1    
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
     });
 }
@@ -145,11 +182,26 @@ const pic5 =  function(callback){
         //该图对应的collection
                 
         // 以下代码根据不同功能重新实现
-        const collection = db.collection('province_box');
-        collection.find().toArray(function(err, docs) {
+        const collection = db.collection('area_box');
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$limit': 1    
+            }
+        ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            console.log(docs + JSON.stringify(docs));
+            var newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
     });
 }
