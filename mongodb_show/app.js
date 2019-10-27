@@ -32,25 +32,21 @@ const film_box =  function(callback){
             {
                 '$sort': {'time': -1}
             }, {
-                '$limit': 1    
+                '$group': {
+                    '_id': {'name': '$name'},
+                    'time': {'$first': '$time'},
+                    'total_box': {'$first': '$total_box'},
+                    'online_box': {'$first': '$online_box'}
+                }
+            }, {
+                '$sort': {
+                    'total_box': -1
+                }
             }
         ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            newestDate = docs[0].time;
-            collection.aggregate([
-                {
-                    '$match': {'time':{'$gte': newestDate}}
-                },
-                {
-                '$sort': {'total_box': -1}
-                }, {
-                    '$limit': 20    //前20条
-                }
-            ]).toArray(function(err, docs) {
-                assert.equal(err, null);
-                callback(docs);
-                client.close();
-            });
+            callback(docs);
+            client.close();
         });
     });
 
@@ -80,7 +76,7 @@ const type_box =  function(callback){
             }
         ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            newestDate = docs[0].time;
+            newestDate = docs.length > 0 ?  docs[0].time : '';
             collection.aggregate([
                 {
                     '$match': {'time':{'$gte': newestDate}}

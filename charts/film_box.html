@@ -11,7 +11,7 @@
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1400px;height:500px;"></div>
+    <div id="main" style="width: 1400px;height:800px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
@@ -38,13 +38,13 @@
                 },
                 success: function(ret){
                     var data = JSON.parse(ret);
-                    if (data.length > 0) {
-                        time = data[0].time;
-                    }
                     for(var i = 0;i<data.length;i++){
-                        type[i] = data[i].name;
-                        total_month_box[i] = data[i].total_box;
-                        online_month_box[i] = data[i].online_box;
+                        time = data[i].time > time ? data[i].time : time;
+                        if (i < 20) {
+                            type[i] = data[i]._id.name;
+                            total_month_box[i] = data[i].total_box;
+                            online_month_box[i] = data[i].online_box;
+                        }
                     }
                     if(typeof callback == "function"){
                         callback();
