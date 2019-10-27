@@ -9,7 +9,7 @@ from config import *
 import random
 
 
-collection, hdfs_client, hdfs_path = Config.get_config(conf=Config.gyue_conf, stream_type=StreamType.AREA)
+collection, hdfs_client, hdfs_path = Config.get_config(conf=Config.gyue_conf, stream_type=StreamType.FILM)
 
 pattern = '%Y-%m-%d'
 beginStr = "2011-11-01"
@@ -22,7 +22,7 @@ nextStr = nextTime.strftime(pattern)
 
 before = time.time()
 
-for mon in range(13):
+for mon in range(totalMonths):
     before0 = time.time()
     nextTime = beginTime + relativedelta(months=1)
     nextStr = nextTime.strftime(pattern)
@@ -43,7 +43,7 @@ for mon in range(13):
     beginStr = nextStr
     after0 = time.time()
     print(after0 - before0)
-    time.sleep(1)
+    time.sleep(2)
     # time.sleep(0.6)
 after = time.time()
 # print(after-before)

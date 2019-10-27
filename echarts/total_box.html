@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <title>Total</title>
+    <script src="echarts.js"></script>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="thems/shine.js"></script>
+</head>
+
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1400px;height:500px;"></div>
+    
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'), 'shine');
+        var barWidth = 30;
+        
+        var time = [];
+        var total_month_box = [];
+        var online_month_box = [];
+        var time_str = "";
+        var interval_time = 800;
+        getData(picInit);       
+        
+        var option;
+        
+        function getData(callback){
+            jQuery.ajax({
+                url: "http://localhost:8888/total_box", //url 必须写在这里 不然chrome会报CORS error
+                type: "get",
+                dataType: "text",
+                async: true,
+                error : function(req, message) {
+                    alert(JSON.stringify(req) + message);
+                },
+                success: function(ret){
+                    var data = JSON.parse(ret);
+                    if (data.length > 0) {
+                        time_str = data[data.length - 1].time;
+                    }
+                    for(var i = 0;i<data.length;i++){
+                        time[i] = data[i].time;
+                        total_month_box[i] = data[i].total_month_box;
+                        online_month_box[i] = data[i].online_month_box;
+                    }
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                    console.log(total_month_box);
+                    console.log(online_month_box);
+                }
+            });
+        }
+
+        function picInit(){
+            option = {
+                title: {
+                    text: '票房大盘 截至：' + time_str
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'cross'       
+                    }
+                },
+                //图例
+                legend: {
+                    data:['总票房','网票票房']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: ['20%', '20%'],
+                    data: time,
+                    axisLabel: {
+                        // interval:1,
+                        rotate:45
+                    },
+                },
+                yAxis: {
+                    type: 'value'           
+                },
+                series: [
+                    
+                    {
+                        name:'总票房',
+                        type:'line',
+                        data:total_month_box,
+                        hoverAnimation: false,
+                        showSymbol: false,
+                    },
+                    {
+                        name:'网票票房',
+                        type:'line',
+                        data:online_month_box,
+                        hoverAnimation: false,
+                        showSymbol: false,
+                    }
+                ]
+            };
+
+            //刷新数据
+            setInterval(function () {
+                getData();
+                myChart.setOption({
+                    title: {
+                    text: '票房大盘 截至：' + time_str
+                    },
+                    xAxis: {
+                        data: time
+                    },
+                    series: [
+                        {
+                            name:'总票房',
+                            type:'line',
+                            data:total_month_box,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                        },
+                        {
+                            name:'网票票房',
+                            type:'line',
+                            data:online_month_box,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                        }
+                        
+                    ]
+                });
+            }, interval_time);
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+       }
+
+    </script>
+</body>
+</html>

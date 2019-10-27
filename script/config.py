@@ -31,6 +31,14 @@ class Config(object):
     def get_config(conf, stream_type):
         mongo_client = pymongo.MongoClient(conf['mongo_client'])
         database = mongo_client[conf['database']]
+        if stream_type == StreamType.FILM:
+            database.drop_collection("actor_box")
+            database.drop_collection("film_box")
+            database.drop_collection("location_box")
+            database.drop_collection("total_box")
+            database.drop_collection("type_box")
+        else: 
+            database.drop_collection("area_box")
         collection = database[conf['film_collection' if stream_type == StreamType.FILM else 'area_collection']]
         hdfs_client = InsecureClient(conf['hdfs'], user=conf['user'])
         return collection, hdfs_client, "streamInput/film" if stream_type == StreamType.FILM else "streamInput/area"
