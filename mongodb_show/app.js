@@ -3,21 +3,21 @@ const assert = require('assert');
 const http = require('http');   
 
 // const hostname ='192.168.1.200';
-const hostname ='172.19.117.184';
+const hostname ='localhost';
 const port = 8888;   
 
 // Connection URL
 // const url = 'mongodb://root:mongo_admin_czsA68g@192.168.1.200:27017';
-const url = 'mongodb://root:mongo_admin_czsA68g@172.19.117.184:27017';
+const url = 'mongodb://localhost:27017';
 
 // Database Name
-const dbName = 'test';
+const dbName = 'sparkpractise';
 
 // 图1  柱图  该月 top 电影数据   
 // @docs：  (降序排序)
 // [{"time":"2019-10","name":"我和我的祖国","total_box":343434,"online_box":232323},
 //  {"time":"2019-10","name":"我和我的祖国","total_box":232323,"online_box":121212},...]
-const pic1 =  function(callback){
+const film_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -58,13 +58,12 @@ const pic1 =  function(callback){
 // @docs：  (降序排序)
 // [{"time":"2019-10","type":"动作","total_month_box":343434,"online_month_box":232323},
 //  {"time":"2019-10","type":"科幻","total_month_box":232323,"online_month_box":121212},...]
-const pic2 =  function(callback){
+const type_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
         const db = client.db(dbName);
         //该图对应的collection
-                
         // 以下代码根据不同功能重新实现
         const collection = db.collection('type_box');
         collection.aggregate([
@@ -73,12 +72,13 @@ const pic2 =  function(callback){
             }, {
                 '$group': {
                     '_id': {'type': '$type'}, 
-                    'time': {'$first': '$time'}, 
+                    'time': {'$first': '$time'},
                     'total_month_box': {'$first': '$total_month_box'}, 
                     'online_month_box': {'$first': '$online_month_box'}
                 }
             }, {
                 '$sort': {
+                    'time': -1,
                     'total_month_box': -1
                 }
             }, {
@@ -93,9 +93,7 @@ const pic2 =  function(callback){
 }
 
 // 图3 线图  票房变化数据
-// @docs：  ？？时间的控制？？  如何控制每次发送哪一个月的数据？  开始时从哪个数据开始取？   最新插入collection的数据？
-// {"time":"2019-10","total_month_box":2323232323,"online_month_box":1212121212}
-const pic3 =  function(callback){
+const total_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -104,7 +102,7 @@ const pic3 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('total_box');
-        collection.find().toArray(function(err, docs) {
+        collection.find().sort({"time": 1}).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
@@ -116,7 +114,7 @@ const pic3 =  function(callback){
 // @docs：  
 // [{"time":"2019-10","location":"中国","box_percent":21.6},
 //  {"time":"2019-10","location":"美国","box_percent":23.6},...]
-const pic4 =  function(callback){
+const location_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -125,7 +123,7 @@ const pic4 =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('location_box');
-        collection.find().toArray(function(err, docs) {
+        collection.find().sort({"time": 1}).toArray(function(err, docs) {
             assert.equal(err, null);
             callback(docs);
             client.close();
@@ -194,20 +192,20 @@ const pic6 =  function(callback){
 
 const myParseUrl = function(url,callback){
     data = {};
-    var picID = Number(url.substr(1));
+    var picID = url.substr(1);
     console.log(url + "|" + picID + typeof picID);
     switch(picID){
-        case 1:
-           pic1(function(ret){callback(ret);});
+        case "film_box":
+           film_box(function(ret){callback(ret);});
            break;
-        case 2:
-           pic2(function(ret){callback(ret);});
+        case "type_box":
+           type_box(function(ret){callback(ret);});
            break;
-        case 3:
-           pic3(function(ret){callback(ret);});
+        case "total_box":
+           total_box(function(ret){callback(ret);});
            break;
-        case 4:
-           pic4(function(ret){callback(ret);});
+        case "location_box":
+           location_box(function(ret){callback(ret);});
            break;
         case 5:
            pic5(function(ret){callback(ret);});

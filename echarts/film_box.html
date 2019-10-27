@@ -1,33 +1,35 @@
 <!DOCTYPE html>
-<!-- 第二张图  电影类型 变化图 -->
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <title>电影类型变化柱图</title>
+    <title>Film</title>
     <script src="echarts.js"></script>
     <script src="jquery-3.4.1.min.js"></script>
+    <script src="thems/shine.js"></script>
 </head>
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1200px;height:600px;"></div>
+    <div id="main" style="width: 1400px;height:500px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('main'));
+        var myChart = echarts.init(document.getElementById('main'), 'shine');
+        var barWidth = 30;
         
         var type = [];
         var total_month_box = [];
         var online_month_box = [];
-        getData(picInit);
-        var picUrl_2 = "http://172.19.117.184:8888/2";        
+        var time = "";
+        var interval_time = 800;
+        getData(picInit);       
         
         var option;
         
         function getData(callback){
             jQuery.ajax({
-                url: "http://172.19.117.184:8888/2", //url 必须写在这里 不然chrome会报CORS error
+                url: "http://localhost:8888/film_box", //url 必须写在这里 不然chrome会报CORS error
                 type: "get",
                 dataType: "text",
                 async: true,
@@ -35,12 +37,14 @@
                     alert(JSON.stringify(req) + message);
                 },
                 success: function(ret){
-                    console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
+                    if (data.length > 0) {
+                        time = data[0].time;
+                    }
                     for(var i = 0;i<data.length;i++){
-                        type[i] = data[i]._id.type;
-                        total_month_box[i] = data[i].total_month_box;
-                        online_month_box[i] = data[i].online_month_box;
+                        type[i] = data[i]._id.name;
+                        total_month_box[i] = data[i].total_box;
+                        online_month_box[i] = data[i].online_box;
                     }
                     if(typeof callback == "function"){
                         callback();
@@ -52,7 +56,7 @@
         function picInit(){
             option = {
                 title: {
-                    text: '电影类型 变化图'
+                    text: '电影名称 ' + time
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -62,7 +66,7 @@
                 },
                 //图例
                 legend: {
-                    data:['总票房','在线票房']
+                    data:['总票房','网票票房']
                 },
                 grid: {
                     left: '3%',
@@ -73,38 +77,29 @@
                 xAxis: {
                     type: 'category',
                     boundaryGap: ['20%', '20%'],
-                    data: type
+                    data: type,
+                    axisLabel: {
+                        interval:0,
+                        rotate:45
+                    },
                 },
                 yAxis: {
                     type: 'value'           
                 },
-                dataZoom: [
-                    {
-                        type: 'slider',
-                        show: true,
-                        xAxisIndex: [0]
-                    },
-                    {
-                        type: 'slider',
-                        show: true,
-                        yAxisIndex: [0],
-                        left: '93%'
-                    }
-                ],
                 series: [
                     
                     {
                         name:'总票房',
                         type:'bar',
                         barGap: '-100%',
-                        barWidth:20,
+                        barWidth:barWidth,
                         barCategoryGap:'50%',
                         data:total_month_box
                     },
                     {
-                        name:'在线票房',
+                        name:'网票票房',
                         type:'bar',
-                        barWidth:20,
+                        barWidth:barWidth,
                         data:online_month_box
                     }
                 ]
@@ -114,6 +109,9 @@
             setInterval(function () {
                 getData();
                 myChart.setOption({
+                    title: {
+                    text: '电影名称 ' + time
+                    },
                     xAxis: {
                         data: type
                     },
@@ -122,20 +120,20 @@
                             name:'总票房',
                             type:'bar',
                             barGap: '-100%',
-                            barWidth:20,
+                            barWidth:barWidth,
                             barCategoryGap:'50%',
                             data:total_month_box
                         },
                         {
-                            name:'在线票房',
+                            name:'网票票房',
                             type:'bar',
-                            barWidth:20,
+                            barWidth:barWidth,
                             data:online_month_box
                         }
                         
                     ]
                 });
-            }, 500);
+            }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

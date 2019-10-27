@@ -237,7 +237,8 @@ public class FilmStreamHandler {
                     return res.iterator();
                 }).filter(
                         filmStream -> filmStream.getTotalBox() != null && filmStream.getOnlineBox() != null
-                                && filmStream.getOnlineBox() <= filmStream.getTotalBox()
+                                && filmStream.getOnlineBox() <= filmStream.getTotalBox() && filmStream.getOnlineBox()
+                                >= 0
 
                 ).mapToPair(
                         filmStream -> {
