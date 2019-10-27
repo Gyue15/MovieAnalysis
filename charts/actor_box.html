@@ -20,13 +20,13 @@
         var actor = [];
         var total_year_box = [];
         var online_year_box = [];
-        getData(picInit);     
+        getData(picInit);
         
         var option;
         
         function getData(callback){
             jQuery.ajax({
-                url: "http://localhost:8888/6", //url 必须写在这里 不然chrome会报CORS error
+                url: "http://localhost:8888/actor_box", //url 必须写在这里 不然chrome会报CORS error
                 type: "get",
                 dataType: "text",
                 async: true,

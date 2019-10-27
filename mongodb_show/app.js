@@ -27,43 +27,54 @@ const film_box =  function(callback){
         // 以下代码根据不同功能重新实现
         const collection = db.collection('film_box');
         
-        //var max = collection.
+        var newestDate;
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$limit': 1    
+            }
+        ]).toArray(function(err, docs) {
+            assert.equal(err, null);
+            newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                },
+                {
+                '$sort': {'total_box': -1}
+                }, {
+                    '$limit': 20    //前20条
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
+        });
+        
         //collection.aggregate([
         //    {
-        //        '$match': {
-        //            'time': {
-        //                '$gte': max
-        //            }
+        //        '$sort': {'time': -1}
+        //    }, {
+        //        '$group': {
+        //            '_id': {'name': '$name'}, 
+        //            'time': {'$first': '$time'}, 
+        //            'total_box': {'$first': '$total_box'}, 
+        //            'online_box': {'$first': '$online_box'}
         //        }
+        //    }, {
+        //        '$sort': {
+        //            'total_box': -1
+        //        }
+        //    }, {
+        //        '$limit': 20    //前20条
         //    }
         //]).toArray(function(err, docs) {
         //    assert.equal(err, null);
         //    callback(docs);
         //    client.close();
         //});
-        
-        collection.aggregate([
-            {
-                '$sort': {'time': -1}
-            }, {
-                '$group': {
-                    '_id': {'name': '$name'}, 
-                    'time': {'$first': '$time'}, 
-                    'total_box': {'$first': '$total_box'}, 
-                    'online_box': {'$first': '$online_box'}
-                }
-            }, {
-                '$sort': {
-                    'total_box': -1
-                }
-            }, {
-                '$limit': 20    //前20条
-            }
-        ]).toArray(function(err, docs) {
-            assert.equal(err, null);
-            callback(docs);
-            client.close();
-        });
     });
 
 }
@@ -82,29 +93,54 @@ const type_box =  function(callback){
         //该图对应的collection
         // 以下代码根据不同功能重新实现
         const collection = db.collection('type_box');
+        
+        var newestDate;
         collection.aggregate([
             {
                 '$sort': {'time': -1}
             }, {
-                '$group': {
-                    '_id': {'type': '$type'}, 
-                    'time': {'$first': '$time'},
-                    'total_month_box': {'$first': '$total_month_box'}, 
-                    'online_month_box': {'$first': '$online_month_box'}
-                }
-            }, {
-                '$sort': {
-                    'time': -1,
-                    'total_month_box': -1
-                }
-            }, {
-                '$limit': 20    //前20条
+                '$limit': 1    
             }
         ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            newestDate = docs[0].time;
+            collection.aggregate([
+                {
+                    '$match': {'time':{'$gte': newestDate}}
+                },
+                {
+                '$sort': {'total_month_box': -1}
+                }, {
+                    '$limit': 20    //前20条
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
+        //collection.aggregate([
+        //    {
+        //        '$sort': {'time': -1}
+        //    }, {
+        //        '$group': {
+        //            '_id': {'type': '$type'}, 
+        //            'time': {'$first': '$time'}, 
+        //            'total_month_box': {'$first': '$total_month_box'}, 
+        //            'online_month_box': {'$first': '$online_month_box'}
+        //        }
+        //    }, {
+        //        '$sort': {
+        //            'total_month_box': -1
+        //        }
+        //    }, {
+        //        '$limit': 20    //前20条
+        //    }
+        //]).toArray(function(err, docs) {
+        //    assert.equal(err, null);
+        //    callback(docs);
+        //    client.close();
+        //});
     });
 }
 
@@ -196,28 +232,53 @@ const actor =  function(callback){
                 
         // 以下代码根据不同功能重新实现
         const collection = db.collection('actor_box');
+        var newestDate;
         collection.aggregate([
             {
                 '$sort': {'month': -1}
             }, {
-                '$group': {
-                    '_id': {'actor': '$actor'}, 
-                    'time': {'$first': '$time'}, 
-                    'total_year_box': {'$first': '$total_year_box'}, 
-                    'online_year_box': {'$first': '$online_year_box'}
-                }
-            }, {
-                '$sort': {
-                    'total_year_box': -1  //结果降序
-                }
-            }, {
-                '$limit': 20    //前20条
+                '$limit': 1    
             }
         ]).toArray(function(err, docs) {
             assert.equal(err, null);
-            callback(docs);
-            client.close();
+            newestDate = docs[0].month;
+            collection.aggregate([
+                {
+                    '$match': {'month':{'$gte': newestDate}}
+                },
+                {
+                '$sort': {'total_year_box': -1}
+                }, {
+                    '$limit': 20    //前20条
+                }
+            ]).toArray(function(err, docs) {
+                assert.equal(err, null);
+                callback(docs);
+                client.close();
+            });
         });
+        //collection.aggregate([
+        //    {
+        //        '$sort': {'month': -1}
+        //    }, {
+        //        '$group': {
+        //            '_id': {'actor': '$actor'}, 
+        //            'time': {'$first': '$time'}, 
+        //            'total_year_box': {'$first': '$total_year_box'}, 
+        //            'online_year_box': {'$first': '$online_year_box'}
+        //        }
+        //    }, {
+        //        '$sort': {
+        //            'total_year_box': -1  //结果降序
+        //        }
+        //    }, {
+        //        '$limit': 20    //前20条
+        //    }
+        //]).toArray(function(err, docs) {
+        //    assert.equal(err, null);
+        //    callback(docs);
+        //    client.close();
+        //});
     });
 }
 

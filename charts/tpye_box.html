@@ -21,6 +21,8 @@
         var type = [];
         var total_month_box = [];
         var online_month_box = [];
+
+        var now_date;
         var time = "";
         var interval_time = 800;
         getData(picInit);      
@@ -43,7 +45,8 @@
                         time = data[0].time;
                     }
                     for(var i = 0;i<data.length;i++){
-                        type[i] = data[i]._id.type;
+                        now_date = data[i].time;
+                        type[i] = data[i].type;
                         total_month_box[i] = data[i].total_month_box;
                         online_month_box[i] = data[i].online_month_box;
                     }
@@ -56,6 +59,16 @@
 
         function picInit(){
             option = {
+                graphic: [{
+                                type: 'text',
+                                z: 100,
+                                position:[900,100],
+                                style: {
+                                    text: now_date,
+                                    font: '32px "STHeiti", sans-serif'
+                                }
+                            }
+                        ],
                 title: {
                     text: '电影类型 ' + time
                 },
