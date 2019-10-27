@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- 第二张图  电影类型 变化图 -->
+<!-- 第一张图  电影名称 变化图 -->
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <title>电影类型变化柱图</title>
+    <title>电影 变化柱图</title>
     <script src="echarts.js"></script>
     <script src="jquery-3.4.1.min.js"></script>
 </head>
@@ -17,16 +17,16 @@
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
         
-        var type = [];
-        var total_month_box = [];
-        var online_month_box = [];
+        var film_name = [];
+        var total_box = [];
+        var online_box = [];
         getData(picInit);     
         
         var option;
         
         function getData(callback){
             jQuery.ajax({
-                url: "http://192.168.1.200:8888/2", //url 必须写在这里 不然chrome会报CORS error
+                url: "http://192.168.1.200:8888/1", //url 必须写在这里 不然chrome会报CORS error
                 type: "get",
                 dataType: "text",
                 async: true,
@@ -37,9 +37,9 @@
                     console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
                     for(var i = 0;i<data.length;i++){
-                        type[i] = data[i]._id.type;
-                        total_month_box[i] = data[i].total_month_box;
-                        online_month_box[i] = data[i].online_month_box;
+                        film_name[i] = data[i]._id.name;
+                        total_box[i] = data[i].total_box;
+                        online_box[i] = data[i].online_box;
                     }
                     if(typeof callback == "function"){
                         callback();
@@ -51,7 +51,7 @@
         function picInit(){
             option = {
                 title: {
-                    text: '电影类型 变化图'
+                    text: '电影 变化图'
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -72,10 +72,15 @@
                 xAxis: {
                     type: 'category',
                     boundaryGap: ['20%', '20%'],
-                    data: type
+                    data: film_name,
+                    axisLabel:{
+                        formatter:function(value){
+                            return value.split("").join("\n");
+                        }
+                    }
                 },
                 yAxis: {
-                    type: 'value'           
+                    type: 'value'
                 },
                 //dataZoom: [
                 //    {
@@ -98,13 +103,13 @@
                         barGap: '-100%',
                         barWidth:20,
                         barCategoryGap:'50%',
-                        data:total_month_box
+                        data:total_box
                     },
                     {
                         name:'在线票房',
                         type:'bar',
                         barWidth:20,
-                        data:online_month_box
+                        data:online_box
                     }
                 ]
             };
@@ -114,7 +119,7 @@
                 getData();
                 myChart.setOption({
                     xAxis: {
-                        data: type
+                        data: film_name
                     },
                     series: [
                         {
@@ -123,13 +128,13 @@
                             barGap: '-100%',
                             barWidth:20,
                             barCategoryGap:'50%',
-                            data:total_month_box
+                            data:total_box
                         },
                         {
                             name:'在线票房',
                             type:'bar',
                             barWidth:20,
-                            data:online_month_box
+                            data:online_box
                         }
                         
                     ]
