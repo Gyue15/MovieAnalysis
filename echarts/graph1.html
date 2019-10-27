@@ -20,6 +20,7 @@
         var film_name = [];
         var total_box = [];
         var online_box = [];
+        var now_date;
         getData(picInit);     
         
         var option;
@@ -37,7 +38,8 @@
                     console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
                     for(var i = 0;i<data.length;i++){
-                        film_name[i] = data[i]._id.name;
+                        now_date = data[i].time;
+                        film_name[i] = data[i].name;
                         total_box[i] = data[i].total_box;
                         online_box[i] = data[i].online_box;
                     }
@@ -50,6 +52,16 @@
 
         function picInit(){
             option = {
+                graphic: [{
+                                type: 'text',
+                                z: 100,
+                                position:[900,100],
+                                style: {
+                                    text: now_date,
+                                    font: '32px "STHeiti", sans-serif'
+                                }
+                            }
+                        ],
                 title: {
                     text: '电影 变化图'
                 },

@@ -23,6 +23,7 @@
         getData(picInit);     
         
         var option;
+        var now_date;
         
         function getData(callback){
             jQuery.ajax({
@@ -37,7 +38,8 @@
                     console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
                     for(var i = 0;i<data.length;i++){
-                        actor[i] = data[i]._id.actor;
+                        now_date = data[i].time;
+                        actor[i] = data[i].actor;
                         total_year_box[i] = data[i].total_year_box;
                         online_year_box[i] = data[i].online_year_box;
                     }
@@ -50,6 +52,16 @@
 
         function picInit(){
             option = {
+                graphic: [{
+                                type: 'text',
+                                z: 100,
+                                position:[900,100],
+                                style: {
+                                    text: now_date + "年",
+                                    font: '32px "STHeiti", sans-serif'
+                                }
+                            }
+                        ],           
                 title: {
                     text: '演员年数据 变化图'
                 },

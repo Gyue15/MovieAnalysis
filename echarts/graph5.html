@@ -36,6 +36,7 @@
         getData(picInit);
         
         var option;
+        var now_date;
         
         function getData(callback){
             jQuery.ajax({
@@ -51,6 +52,7 @@
                     var data = JSON.parse(ret);
                     map = {};
                     for(var i = 0;i<data.length;i++){
+                        now_date = data[i].time;
                         map[data[i].province] = data[i];
                     }
                     for(var i = 0;i<mydata.length;i++){
@@ -99,6 +101,16 @@
         
         function picInit(){
             option = {
+                graphic: [{
+                                type: 'text',
+                                z: 100,
+                                position:[800,100],
+                                style: {
+                                    text: now_date,
+                                    font: '32px "STHeiti", sans-serif'
+                                }
+                            }
+                        ],                       
                 backgroundColor: '#FFFFFF',  
                 title: {  
                     text: '中国省份票房地图',  
