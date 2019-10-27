@@ -47,6 +47,9 @@ public class FilmStreamHandler {
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<Tuple2<String, String>, Tuple3<Long, Long, String>> boxPerActorPerYear = boxPerFilmPerMonth
+                .filter(
+                        element -> "中国大陆".equals(element._2().getLocation())
+                )
                 .flatMapToPair(
                         element -> {
                             List<Tuple2<Tuple2<String, String>, Tuple3<Long, Long, String>>> res = new ArrayList<>();
@@ -211,8 +214,7 @@ public class FilmStreamHandler {
     }
 
     private static JavaPairDStream<String, FilmStream> computeBoxPerFilmPerMonth(JavaPairDStream<String, FilmStream> perFilmPerMonth) {
-        JavaPairDStream<String, FilmStream> boxPerFilmPerMonth = perFilmPerMonth
-                .reduceByKey(
+        return perFilmPerMonth.reduceByKey(
                         (a, b) -> {
                             FilmStream filmStream = new FilmStream(a);
                             filmStream.setOnlineBox(a.getOnlineBox() + b.getOnlineBox());
@@ -220,7 +222,6 @@ public class FilmStreamHandler {
                             return filmStream;
                         }
                 ).cache();
-        return boxPerFilmPerMonth;
     }
 
     private static void receiveStream(JavaSparkContext sparkContext) {

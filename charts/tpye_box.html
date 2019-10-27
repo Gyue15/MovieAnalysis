@@ -32,7 +32,7 @@
         
         function getData(callback){
             jQuery.ajax({
-                url: "http://localhost:8888/film_box", //url 必须写在这里 不然chrome会报CORS error
+                url: "http://localhost:8888/type_box", //url 必须写在这里 不然chrome会报CORS error
                 type: "get",
                 dataType: "text",
                 async: true,
@@ -59,16 +59,6 @@
 
         function picInit(){
             option = {
-                graphic: [{
-                                type: 'text',
-                                z: 100,
-                                position:[900,100],
-                                style: {
-                                    text: now_date,
-                                    font: '32px "STHeiti", sans-serif'
-                                }
-                            }
-                        ],
                 title: {
                     text: '电影类型 ' + time
                 },
@@ -108,13 +98,15 @@
                         barGap: '-100%',
                         barWidth:barWidth,
                         barCategoryGap:'50%',
-                        data:total_month_box
+                        data:total_month_box,
+                        hoverAnimation: false,
                     },
                     {
                         name:'网票票房',
                         type:'bar',
                         barWidth:barWidth,
-                        data:online_month_box
+                        data:online_month_box,
+                        hoverAnimation: false,
                     }
                 ]
             };
@@ -136,13 +128,15 @@
                             barGap: '-100%',
                             barWidth:barWidth,
                             barCategoryGap:'50%',
-                            data:total_month_box
+                            data:total_month_box,
+                            hoverAnimation: false,
                         },
                         {
                             name:'网票票房',
                             type:'bar',
                             barWidth:barWidth,
-                            data:online_month_box
+                            data:online_month_box,
+                            hoverAnimation: false,
                         }
                         
                     ]

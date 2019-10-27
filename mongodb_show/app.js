@@ -52,29 +52,6 @@ const film_box =  function(callback){
                 client.close();
             });
         });
-        
-        //collection.aggregate([
-        //    {
-        //        '$sort': {'time': -1}
-        //    }, {
-        //        '$group': {
-        //            '_id': {'name': '$name'}, 
-        //            'time': {'$first': '$time'}, 
-        //            'total_box': {'$first': '$total_box'}, 
-        //            'online_box': {'$first': '$online_box'}
-        //        }
-        //    }, {
-        //        '$sort': {
-        //            'total_box': -1
-        //        }
-        //    }, {
-        //        '$limit': 20    //前20条
-        //    }
-        //]).toArray(function(err, docs) {
-        //    assert.equal(err, null);
-        //    callback(docs);
-        //    client.close();
-        //});
     });
 
 }
@@ -119,28 +96,6 @@ const type_box =  function(callback){
                 client.close();
             });
         });
-        //collection.aggregate([
-        //    {
-        //        '$sort': {'time': -1}
-        //    }, {
-        //        '$group': {
-        //            '_id': {'type': '$type'}, 
-        //            'time': {'$first': '$time'}, 
-        //            'total_month_box': {'$first': '$total_month_box'}, 
-        //            'online_month_box': {'$first': '$online_month_box'}
-        //        }
-        //    }, {
-        //        '$sort': {
-        //            'total_month_box': -1
-        //        }
-        //    }, {
-        //        '$limit': 20    //前20条
-        //    }
-        //]).toArray(function(err, docs) {
-        //    assert.equal(err, null);
-        //    callback(docs);
-        //    client.close();
-        //});
     });
 }
 
@@ -223,7 +178,7 @@ const area_box =  function(callback){
 // @docs：  
 // [{"time":"2019-10","actor":"张译","total_year_box":232323,"online_year_box":121212},
 //  {"time":"2019-10","actor":"吴京","total_year_box":232323,"online_year_box":121212},...]
-const actor =  function(callback){
+const actor_box =  function(callback){
     const client = new MongoClient(url, {useNewUrlParser:true});
     client.connect(function(err) {
         assert.equal(null, err);
@@ -257,28 +212,6 @@ const actor =  function(callback){
                 client.close();
             });
         });
-        //collection.aggregate([
-        //    {
-        //        '$sort': {'month': -1}
-        //    }, {
-        //        '$group': {
-        //            '_id': {'actor': '$actor'}, 
-        //            'time': {'$first': '$time'}, 
-        //            'total_year_box': {'$first': '$total_year_box'}, 
-        //            'online_year_box': {'$first': '$online_year_box'}
-        //        }
-        //    }, {
-        //        '$sort': {
-        //            'total_year_box': -1  //结果降序
-        //        }
-        //    }, {
-        //        '$limit': 20    //前20条
-        //    }
-        //]).toArray(function(err, docs) {
-        //    assert.equal(err, null);
-        //    callback(docs);
-        //    client.close();
-        //});
     });
 }
 
@@ -302,8 +235,8 @@ const myParseUrl = function(url,callback){
         case "area_box":
            area_box(function(ret){callback(ret);});
            break;
-        case 6:
-           pic6(function(ret){callback(ret);});
+        case "actor_box":
+           actor_box(function(ret){callback(ret);});
            break;
     }
     

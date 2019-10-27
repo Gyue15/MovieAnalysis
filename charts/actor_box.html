@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <title>演员 变化柱图</title>
+    <title>Actor</title>
     <script src="echarts.js"></script>
     <script src="jquery-3.4.1.min.js"></script>
 </head>
@@ -21,9 +21,10 @@
         var total_year_box = [];
         var online_year_box = [];
         getData(picInit);
+        var barWidth = 30;
         
         var option;
-        
+        var now_date = '';
         function getData(callback){
             jQuery.ajax({
                 url: "http://localhost:8888/actor_box", //url 必须写在这里 不然chrome会报CORS error
@@ -37,9 +38,10 @@
                     console.log("returnData:" + ret);//数据成功获取
                     var data = JSON.parse(ret);
                     for(var i = 0;i<data.length;i++){
-                        actor[i] = data[i]._id.actor;
+                        actor[i] = data[i].actor;
                         total_year_box[i] = data[i].total_year_box;
                         online_year_box[i] = data[i].online_year_box;
+                        now_date = data[i]['time'];
                     }
                     if(typeof callback == "function"){
                         callback();
@@ -51,7 +53,7 @@
         function picInit(){
             option = {
                 title: {
-                    text: '演员年数据 变化图'
+                    text: '演员年数据 ' + now_date
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -82,34 +84,23 @@
                 yAxis: {
                     type: 'value'           
                 },
-                //dataZoom: [
-                //    {
-                //        type: 'slider',
-                //        show: true,
-                //        xAxisIndex: [0]
-                //    },
-                //    {
-                //        type: 'slider',
-                //        show: true,
-                //        yAxisIndex: [0],
-                //        left: '93%'
-                //    }
-                //],
                 series: [
                     
                     {
                         name:'总票房',
                         type:'bar',
                         barGap: '-100%',
-                        barWidth:20,
+                        barWidth:barWidth,
                         barCategoryGap:'50%',
-                        data:total_year_box
+                        data:total_year_box,
+                        hoverAnimation: false,
                     },
                     {
                         name:'在线票房',
                         type:'bar',
-                        barWidth:20,
-                        data:online_year_box
+                        barWidth:barWidth,
+                        data:online_year_box,
+                        hoverAnimation: false,
                     }
                 ]
             };
@@ -118,6 +109,9 @@
             setInterval(function () {
                 getData();
                 myChart.setOption({
+                    title: {
+                    text: '演员年数据 ' + now_date
+                    },
                     xAxis: {
                         data: actor
                     },
@@ -126,15 +120,17 @@
                             name:'总票房',
                             type:'bar',
                             barGap: '-100%',
-                            barWidth:20,
+                            barWidth:barWidth,
                             barCategoryGap:'50%',
-                            data:total_year_box
+                            data:total_year_box,
+                            hoverAnimation: false,
                         },
                         {
                             name:'在线票房',
                             type:'bar',
-                            barWidth:20,
-                            data:online_year_box
+                            barWidth:barWidth,
+                            data:online_year_box,
+                            hoverAnimation: false,
                         }
                         
                     ]

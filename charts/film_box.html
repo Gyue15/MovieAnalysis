@@ -42,7 +42,7 @@
                         time = data[0].time;
                     }
                     for(var i = 0;i<data.length;i++){
-                        type[i] = data[i]._id.name;
+                        type[i] = data[i].name;
                         total_month_box[i] = data[i].total_box;
                         online_month_box[i] = data[i].online_box;
                     }
@@ -94,13 +94,15 @@
                         barGap: '-100%',
                         barWidth:barWidth,
                         barCategoryGap:'50%',
-                        data:total_month_box
+                        data:total_month_box,
+                        hoverAnimation: false,
                     },
                     {
                         name:'网票票房',
                         type:'bar',
                         barWidth:barWidth,
-                        data:online_month_box
+                        data:online_month_box,
+                        hoverAnimation: false,
                     }
                 ]
             };
@@ -122,13 +124,15 @@
                             barGap: '-100%',
                             barWidth:barWidth,
                             barCategoryGap:'50%',
-                            data:total_month_box
+                            data:total_month_box,
+                            hoverAnimation: false,
                         },
                         {
                             name:'网票票房',
                             type:'bar',
                             barWidth:barWidth,
-                            data:online_month_box
+                            data:online_month_box,
+                            hoverAnimation: false,
                         }
                         
                     ]
