@@ -5,6 +5,7 @@ import com.mongodb.spark.MongoSpark;
 import com.mongodb.spark.config.WriteConfig;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.Optional;
@@ -16,6 +17,8 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.bson.Document;
 import scala.Tuple2;
 import scala.Tuple3;
+import scala.Tuple4;
+import scala.Tuple5;
 
 import java.util.*;
 
@@ -93,7 +96,7 @@ public class FilmStreamHandler {
                 ).reduceByKey(
                         (a, b) -> new Tuple2<>(a._1() + b._1(), a._2() + b._2())
                 ).cache();
-        boxPerMonth.print();
+        boxPerMonth.print(1);
         boxPerMonth.foreachRDD(pairRdd -> {
             JavaRDD<Document> documents = pairRdd
                     .map(t -> {
@@ -116,7 +119,8 @@ public class FilmStreamHandler {
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<String, Tuple3<Long, Long, String>> perLocationPerMonth = boxPerFilmPerMonth
                 .mapToPair(
-                        element -> new Tuple2<>(element._2().getLocation(), new Tuple3<>(element._2().getOnlineBox(), element._2().getTotalBox(), element._2().getTime()))
+                        element -> new Tuple2<>(element._2().getLocation(),
+                                new Tuple3<>(element._2().getOnlineBox(), element._2().getTotalBox(), element._2().getTime()))
                 ).reduceByKey((a, b) -> new Tuple3<>(a._1() + b._1(), a._2() + b._2(), a._3()));
         JavaPairDStream<String, Tuple2<Tuple3<Long, Long, String>, Tuple2<Long, Long>>> temp = perLocationPerMonth
                 .mapToPair(
@@ -249,7 +253,8 @@ public class FilmStreamHandler {
         writeOverrides.put("writeConcern.w", "majority");
         WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
         JavaPairDStream<Tuple2<String,String>,Tuple3<Long,Long,String>> upToNowPerDirectorPerType = boxPerFilmPerMonth
-                .filter(element-> element._2().getDirector()!=null&&element._2().getDirector().length()>0&&element._2().getLocation().contains("中国"))
+                .filter(element-> element._2().getDirector()!=null&&element._2().getDirector().length()>0
+                        &&element._2().getLocation().contains("中国"))
                 .flatMapToPair(element->{
                     List<Tuple2<Tuple2<String,String>,Tuple3<Long,Long,String>>> res = new ArrayList<>();
                     for(int i=0;i<element._2().getType().size();i++){
@@ -275,6 +280,41 @@ public class FilmStreamHandler {
                     });
             MongoSpark.save(documents, writeConfig);
         });
+    }
+
+    private static void computeTop3PerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth,JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth,JavaSparkContext sparkContext){
+        Map<String, String> writeOverrides = new HashMap<>();
+        writeOverrides.put("collection", "box_top3_per_month");
+        writeOverrides.put("writeConcern.w", "majority");
+        WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
+        JavaPairDStream<String, Tuple5<Long,Long,Long,Long,Long>> top3PerMonth = boxPerFilmPerMonth
+                .mapToPair(element->new Tuple2<>(element._2().getTotalBox(),element._2().getTime()))
+                .transformToPair(rdd->{
+                    List<Tuple2<Long,String>> top3List = rdd.sortByKey(false).take(3);
+                    Long top1 = top3List.size()>=1?top3List.get(0)._1():0l;
+                    Long top2 = top3List.size()>=2?top3List.get(1)._1():0l;
+                    Long top3 = top3List.size()>=3?top3List.get(2)._1():0l;
+                    Long sum = top1+top2+top3;
+                    return rdd.mapToPair(r->new Tuple2<>(r._2(),new Tuple4<>(top1,top2,top3,sum))).distinct();
+                }).join(boxPerMonth).mapValues(v->
+                    new Tuple5<>(v._1()._1(),v._1()._2(),v._1()._3(),v._1()._4(),v._2()._2()-v._1()._4())
+                );
+        top3PerMonth.print(1);
+        top3PerMonth.foreachRDD(pairRdd->{
+            JavaRDD<Document> documents = pairRdd
+                    .map(t -> {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("time", t._1());
+                        jsonObject.put("top1", t._2()._1());
+                        jsonObject.put("top2", t._2()._2());
+                        jsonObject.put("top3", t._2()._3());
+                        jsonObject.put("top3_sum", t._2()._4());
+                        jsonObject.put("other_sum", t._2()._5());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
+            MongoSpark.save(documents, writeConfig);
+        });
+
     }
 
     private static void computeBoxPerActorPerType(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext){
@@ -344,6 +384,7 @@ public class FilmStreamHandler {
         computeActorPerYear(boxPerFilmPerMonth, sparkContext);
         computeBoxPerDirectorPerType(boxPerFilmPerMonth,sparkContext);
         computeBoxPerActorPerType(boxPerFilmPerMonth,sparkContext);
+        computeTop3PerMonth(boxPerFilmPerMonth,boxPerMonth,sparkContext);
         streamingContext.start();              // Start the computation
         try {
             streamingContext.awaitTermination();   // Wait for the computation to terminate
@@ -361,8 +402,6 @@ public class FilmStreamHandler {
                 .config("spark.mongodb.output.database", "sparkpractise")
                 .config("spark.mongodb.output.collection", "testCollection")
                 .getOrCreate();
-//        SparkConf sparkConf = new SparkConf().setAppName("myStreaming");
-//        JavaSparkContext sparkContext = new JavaSparkContext(sparkConf);
         JavaSparkContext sparkContext = new JavaSparkContext(sparkSession.sparkContext());
         receiveStream(sparkContext);
     }
