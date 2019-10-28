@@ -213,8 +213,12 @@ public class FilmStreamHandler {
 
     }
 
-    private static JavaPairDStream<String, FilmStream> computeBoxPerFilmPerMonth(JavaPairDStream<String, FilmStream> perFilmPerMonth) {
-        return perFilmPerMonth.reduceByKey(
+    private static JavaPairDStream<String, FilmStream> computeBoxPerFilmPerMonth(JavaPairDStream<String, FilmStream> perFilmPerMonth,JavaSparkContext sparkContext) {
+        Map<String, String> writeOverrides = new HashMap<>();
+        writeOverrides.put("collection", "film_box_per_month");
+        writeOverrides.put("writeConcern.w", "majority");
+        WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
+        JavaPairDStream<String,FilmStream> boxPerFilmPerMonth = perFilmPerMonth.reduceByKey(
                         (a, b) -> {
                             FilmStream filmStream = new FilmStream(a);
                             filmStream.setOnlineBox(a.getOnlineBox() + b.getOnlineBox());
@@ -222,6 +226,91 @@ public class FilmStreamHandler {
                             return filmStream;
                         }
                 ).cache();
+        boxPerFilmPerMonth.print(1);
+        boxPerFilmPerMonth.foreachRDD(
+                pairRdd->{
+                    JavaRDD<Document> documents = pairRdd.map(t->{
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name", t._1());
+                        jsonObject.put("time", t._2().getTime());
+                        jsonObject.put("total_box", t._2().getTotalBox());
+                        jsonObject.put("online_box", t._2().getTotalBox());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
+                    MongoSpark.save(documents,writeConfig);
+                }
+        );
+        return boxPerFilmPerMonth;
+    }
+
+    private static void computeBoxPerDirectorPerType(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext){
+        Map<String, String> writeOverrides = new HashMap<>();
+        writeOverrides.put("collection", "uptonow_box_per_director_per_type");
+        writeOverrides.put("writeConcern.w", "majority");
+        WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
+        JavaPairDStream<Tuple2<String,String>,Tuple3<Long,Long,String>> upToNowPerDirectorPerType = boxPerFilmPerMonth
+                .filter(element-> element._2().getDirector()!=null&&element._2().getDirector().length()>0&&element._2().getLocation().contains("中国"))
+                .flatMapToPair(element->{
+                    List<Tuple2<Tuple2<String,String>,Tuple3<Long,Long,String>>> res = new ArrayList<>();
+                    for(int i=0;i<element._2().getType().size();i++){
+                        res.add(new Tuple2<>(
+                                new Tuple2<>(element._2().getDirector(),element._2().getType().get(i)),
+                                new Tuple3<>(element._2().getOnlineBox(),element._2().getTotalBox(),element._2().getTime())
+                        ));
+                    }
+                    return res.iterator();
+                }).updateStateByKey(FilmStreamHandler::updateState);
+        upToNowPerDirectorPerType.print(1);
+        upToNowPerDirectorPerType.foreachRDD(pairRdd->{
+            JavaRDD<Document> documents = pairRdd
+                    .filter(t -> t._2()._3().length() > 0)
+                    .map(t -> {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("director", t._1()._1());
+                        jsonObject.put("type", t._1()._2());
+                        jsonObject.put("time", t._2()._3());
+                        jsonObject.put("total_box", t._2()._2());
+                        jsonObject.put("online_box", t._2()._1());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
+            MongoSpark.save(documents, writeConfig);
+        });
+    }
+
+    private static void computeBoxPerActorPerType(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext){
+        Map<String, String> writeOverrides = new HashMap<>();
+        writeOverrides.put("collection", "uptonow_box_per_actor_per_type");
+        writeOverrides.put("writeConcern.w", "majority");
+        WriteConfig writeConfig = WriteConfig.create(sparkContext).withOptions(writeOverrides);
+        JavaPairDStream<Tuple2<String,String>,Tuple3<Long,Long,String>> upToNowPerActorPerType = boxPerFilmPerMonth
+                .filter(element-> element._2().getLocation().contains("中国"))
+                .flatMapToPair(element->{
+                    List<Tuple2<Tuple2<String,String>,Tuple3<Long,Long,String>>> res = new ArrayList<>();
+                    for(int i=0;i<element._2().getType().size();i++){
+                        for(int j=0;j<element._2().getActors().size();j++){
+                            res.add(new Tuple2<>(
+                                    new Tuple2<>(element._2().getActors().get(j),element._2().getType().get(i)),
+                                    new Tuple3<>(element._2().getOnlineBox(),element._2().getTotalBox(),element._2().getTime())
+                            ));
+                        }
+                    }
+                    return res.iterator();
+                }).updateStateByKey(FilmStreamHandler::updateState);
+        upToNowPerActorPerType.print(1);
+        upToNowPerActorPerType.foreachRDD(pairRdd->{
+            JavaRDD<Document> documents = pairRdd
+                    .filter(t -> t._2()._3().length() > 0)
+                    .map(t -> {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("actor", t._1()._1());
+                        jsonObject.put("type", t._1()._2());
+                        jsonObject.put("time", t._2()._3());
+                        jsonObject.put("total_box", t._2()._2());
+                        jsonObject.put("online_box", t._2()._1());
+                        return Document.parse(jsonObject.toJSONString());
+                    });
+            MongoSpark.save(documents, writeConfig);
+        });
     }
 
     private static void receiveStream(JavaSparkContext sparkContext) {
@@ -247,12 +336,14 @@ public class FilmStreamHandler {
                             return new Tuple2<>(filmStream.getMovieName(), filmStream);
                         }
                 );
-        JavaPairDStream<String, FilmStream> boxPerFilmPerMonth = computeBoxPerFilmPerMonth(perFilmPerMonth);
+        JavaPairDStream<String, FilmStream> boxPerFilmPerMonth = computeBoxPerFilmPerMonth(perFilmPerMonth,sparkContext);
         computeBoxPerFilm(boxPerFilmPerMonth, sparkContext);
         computeBoxPerTypePerMonth(boxPerFilmPerMonth, sparkContext);
         JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth = computeBoxPerMonth(boxPerFilmPerMonth, sparkContext);
         computeLocationRatePerMonth(boxPerFilmPerMonth, sparkContext, boxPerMonth);
         computeActorPerYear(boxPerFilmPerMonth, sparkContext);
+        computeBoxPerDirectorPerType(boxPerFilmPerMonth,sparkContext);
+        computeBoxPerActorPerType(boxPerFilmPerMonth,sparkContext);
         streamingContext.start();              // Start the computation
         try {
             streamingContext.awaitTermination();   // Wait for the computation to terminate
