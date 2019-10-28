@@ -10,9 +10,9 @@ database = client["film"]
 total_box = database["film_detail_data"]
 online_box = database['film_per_day']
 
-film_stream = database["film_stream"]
+film_stream = database["film_stream_new"]
 
-miss_film = database["film_miss"]
+miss_film = database["film_miss_new"]
 
 film_box_dict = {}
 miss_count = 0
@@ -43,6 +43,7 @@ for films_per_day in online_box.find({}):
             "location": o_film["location"] if "location" in o_film else "",
             "actors": o_film["actors"] if "actors" in o_film else [],
             "type": o_film["tag"] if "tag" in o_film else [],
+            "director": o_film["director"] if "director" in o_film else '',
         }
         print(data)
         accept_count += 1

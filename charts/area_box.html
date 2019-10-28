@@ -58,40 +58,42 @@
                         map[data[i].province] = data[i];
                         maxValue = data[i]['total_month_box'] > maxValue ? data[i]['total_month_box'] : maxValue;
                     }
-                    for(var i = 0;i<mydata.length;i++){
-                        switch(mydata[i].name){
-                            case "北京"   :mydata[i].value = map.北京市.total_month_box;break;
-                            case "宁夏"   :mydata[i].value = map.宁夏.total_month_box;break;
-                            case "上海"   :mydata[i].value = map.上海市.total_month_box     ;break;
-                            case "河北"   :mydata[i].value = map.河北省.total_month_box    ;break;
-                            case "云南"   :mydata[i].value = map.云南省.total_month_box    ;break;
-                            case "黑龙江" :mydata[i].value = map.黑龙江.total_month_box    ;break;
-                            case "安徽"   :mydata[i].value = map.安徽省.total_month_box    ;break;
-                            case "新疆"   :mydata[i].value = map.新疆.total_month_box    ;break;
-                            case "浙江"   :mydata[i].value = map.浙江省.total_month_box    ;break;
-                            case "湖北"   :mydata[i].value = map.湖北省.total_month_box    ;break;
-                            case "甘肃"   :mydata[i].value = map.甘肃省.total_month_box    ;break;
-                            case "内蒙古" :mydata[i].value = map.内蒙古.total_month_box    ;break;
-                            case "吉林"   :mydata[i].value = map.吉林省.total_month_box    ;break;
-                            case "贵州"   :mydata[i].value = map.贵州省.total_month_box    ;break;
-                            case "青海"   :mydata[i].value = map.青海省.total_month_box    ;break;
-                            case "四川"   :mydata[i].value = map.四川省.total_month_box    ;break;
-                            case "海南"   :mydata[i].value = map.海南省.total_month_box    ;break;
-                            case "天津"   :mydata[i].value = map.天津市.total_month_box    ;break;
-                            case "重庆"   :mydata[i].value = map.重庆市.total_month_box    ;break;
-                            case "河南"   :mydata[i].value = map.河南省.total_month_box    ;break;
-                            case "辽宁"   :mydata[i].value = map.辽宁省.total_month_box    ;break;
-                            case "湖南"   :mydata[i].value = map.湖南省.total_month_box    ;break;
-                            case "山东"   :mydata[i].value = map.山东省.total_month_box    ;break;
-                            case "江苏"   :mydata[i].value = map.江苏省.total_month_box    ;break;
-                            case "江西"   :mydata[i].value = map.江西省.total_month_box    ;break;
-                            case "广西"   :mydata[i].value = map.广西省.total_month_box    ;break;
-                            case "山西"   :mydata[i].value = map.山西省.total_month_box    ;break;
-                            case "陕西"   :mydata[i].value = map.陕西省.total_month_box    ;break;
-                            case "福建"   :mydata[i].value = map.福建省.total_month_box    ;break;
-                            case "广东"   :mydata[i].value = map.广东省.total_month_box    ;break;
-                            case "西藏"   :mydata[i].value = map.西藏.total_month_box    ;break;
-                            default: break;
+                    if (timeStr !== '') {
+                        for(var i = 0;i<mydata.length;i++){
+                            switch(mydata[i].name){
+                                case "北京"   :mydata[i].value = map.北京市.total_month_box;break;
+                                case "宁夏"   :mydata[i].value = map.宁夏.total_month_box;break;
+                                case "上海"   :mydata[i].value = map.上海市.total_month_box     ;break;
+                                case "河北"   :mydata[i].value = map.河北省.total_month_box    ;break;
+                                case "云南"   :mydata[i].value = map.云南省.total_month_box    ;break;
+                                case "黑龙江" :mydata[i].value = map.黑龙江.total_month_box    ;break;
+                                case "安徽"   :mydata[i].value = map.安徽省.total_month_box    ;break;
+                                case "新疆"   :mydata[i].value = map.新疆.total_month_box    ;break;
+                                case "浙江"   :mydata[i].value = map.浙江省.total_month_box    ;break;
+                                case "湖北"   :mydata[i].value = map.湖北省.total_month_box    ;break;
+                                case "甘肃"   :mydata[i].value = map.甘肃省.total_month_box    ;break;
+                                case "内蒙古" :mydata[i].value = map.内蒙古.total_month_box    ;break;
+                                case "吉林"   :mydata[i].value = map.吉林省.total_month_box    ;break;
+                                case "贵州"   :mydata[i].value = map.贵州省.total_month_box    ;break;
+                                case "青海"   :mydata[i].value = map.青海省.total_month_box    ;break;
+                                case "四川"   :mydata[i].value = map.四川省.total_month_box    ;break;
+                                case "海南"   :mydata[i].value = map.海南省.total_month_box    ;break;
+                                case "天津"   :mydata[i].value = map.天津市.total_month_box    ;break;
+                                case "重庆"   :mydata[i].value = map.重庆市.total_month_box    ;break;
+                                case "河南"   :mydata[i].value = map.河南省.total_month_box    ;break;
+                                case "辽宁"   :mydata[i].value = map.辽宁省.total_month_box    ;break;
+                                case "湖南"   :mydata[i].value = map.湖南省.total_month_box    ;break;
+                                case "山东"   :mydata[i].value = map.山东省.total_month_box    ;break;
+                                case "江苏"   :mydata[i].value = map.江苏省.total_month_box    ;break;
+                                case "江西"   :mydata[i].value = map.江西省.total_month_box    ;break;
+                                case "广西"   :mydata[i].value = map.广西省.total_month_box    ;break;
+                                case "山西"   :mydata[i].value = map.山西省.total_month_box    ;break;
+                                case "陕西"   :mydata[i].value = map.陕西省.total_month_box    ;break;
+                                case "福建"   :mydata[i].value = map.福建省.total_month_box    ;break;
+                                case "广东"   :mydata[i].value = map.广东省.total_month_box    ;break;
+                                case "西藏"   :mydata[i].value = map.西藏.total_month_box    ;break;
+                                default: break;
+                            }
                         }
                     }
 
@@ -143,40 +145,40 @@
             };
 
             //刷新数据
-            setInterval(function () {
-               getData();
-               myChart.setOption({
-                title: {  
-                    text: '中国省份票房地图 ' + timeStr,  
-                    subtext: '',  
-                    x:'center'  
-                },  
-                //左侧小导航图标
-                visualMap: {  
-                    show : true,  
-                    x: 'left',  
-                    y: 'center', 
-                    min: 0,
-                    max: maxValue,
-                    text: [(maxValue / 100000000).toFixed(2) + "亿", '0'],
-                }, 
-                series: [{  
-                    name: '数据',  
-                    type: 'map',  
-                    mapType: 'china',   
-                    roam: true,  
-                    label: {  
-                        normal: {  
-                            show: true  //省份名称  
-                        },  
-                        emphasis: {  
-                            show: false  
-                        }  
-                    },  
-                    data:mydata  //数据
-                }]
-               });
-            }, 500);
+            // setInterval(function () {
+            //    getData();
+            //    myChart.setOption({
+            //     title: {  
+            //         text: '中国省份票房地图 ' + timeStr,  
+            //         subtext: '',  
+            //         x:'center'  
+            //     },  
+            //     //左侧小导航图标
+            //     visualMap: {  
+            //         show : true,  
+            //         x: 'left',  
+            //         y: 'center', 
+            //         min: 0,
+            //         max: maxValue,
+            //         text: [(maxValue / 100000000).toFixed(2) + "亿", '0'],
+            //     }, 
+            //     series: [{  
+            //         name: '数据',  
+            //         type: 'map',  
+            //         mapType: 'china',   
+            //         roam: true,  
+            //         label: {  
+            //             normal: {  
+            //                 show: true  //省份名称  
+            //             },  
+            //             emphasis: {  
+            //                 show: false  
+            //             }  
+            //         },  
+            //         data:mydata  //数据
+            //     }]
+            //    });
+            // }, 500);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

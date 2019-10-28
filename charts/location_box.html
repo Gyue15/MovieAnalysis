@@ -122,18 +122,18 @@
             };
 
             //刷新数据
-            setInterval(function () {
-                getData();
-                myChart.setOption({
-                    title: {
-                    text: '电影产地票房 截至：' + time_str
-                    },
-                    xAxis: {
-                        data: time
-                    },
-                    series: chart_data
-                });
-            }, interval_time);
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '电影产地票房 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: chart_data
+            //     });
+            // }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
