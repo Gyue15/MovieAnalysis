@@ -2,7 +2,6 @@ from requests_html import HTMLSession
 import datetime
 import pymongo
 
-
 class MovieSpider(object):
     def __init__(self):
         self.li_list = ['导演：', '主演：', '片长：', '类型：', '制作国家/地区：']
@@ -22,7 +21,6 @@ class MovieSpider(object):
         }
         self.unit_list = ["千", "万", "亿"]
         self.unit_dict = {
-            "1": 1,
             "千": 1000,
             "万": 10000,
             "亿": 100000000
@@ -70,9 +68,8 @@ class MovieSpider(object):
     @staticmethod
     def get_actors(parent):
         actors = []
-        for a in parent.xpath('li/a/@title'):
+        for a in parent:
             act_name = str(a)
-            # act_name.replace('-', '·')
             act_name = act_name.replace('．', '·')
             actors.append(act_name)
         # 去重

@@ -34,7 +34,7 @@
                 dataType: "text",
                 async: true,
                 error : function(req, message) {
-                    alert(JSON.stringify(req) + message);
+                    console.log(JSON.stringify(req) + message);
                 },
                 success: function(ret){
                     var data = JSON.parse(ret);
@@ -115,34 +115,37 @@
             };
 
             //刷新数据
-            // setInterval(function () {
-            //     getData();
-            //     myChart.setOption({
-            //         title: {
-            //         text: '票房大盘 截至：' + time_str
-            //         },
-            //         xAxis: {
-            //             data: time
-            //         },
-            //         series: [
-            //             {
-            //                 name:'总票房',
-            //                 type:'line',
-            //                 data:total_month_box,
-            //                 hoverAnimation: false,
-            //                 showSymbol: false,
-            //             },
-            //             {
-            //                 name:'网票票房',
-            //                 type:'line',
-            //                 data:online_month_box,
-            //                 hoverAnimation: false,
-            //                 showSymbol: false,
-            //             }
+            setInterval(function () {
+                getData();
+                myChart.setOption({
+                    title: {
+                    text: '票房大盘 截至：' + time_str
+                    },
+                    xAxis: {
+                        data: time
+                    },
+                    series: [
+                        {
+                            name:'总票房',
+                            type:'bar',
+                            barGap: '-100%',
+                            barWidth:barWidth,
+                            data:total_month_box,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                        },
+                        {
+                            name:'网票票房',
+                            type:'bar',
+                            barWidth:barWidth,
+                            data:online_month_box,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                        }
                         
-            //         ]
-            //     });
-            // }, interval_time);
+                    ]
+                });
+            }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

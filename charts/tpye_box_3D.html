@@ -12,7 +12,7 @@
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1400px;height:600px;"></div>
+    <div id="main" style="width: 1400px;height:800px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
@@ -113,21 +113,15 @@
                     ],
                     source: chart_data
                 },
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
-                        type : 'cross'       
-                    }
-                },
+                // tooltip: {
+                //     trigger: 'axis',
+                //     axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                //         type : 'cross'       
+                //     }
+                // },
                 //图例
-                legend: {
-                    data:location_list
-                },
-                // grid: {
-                //     left: '3%',
-                //     right: '4%',
-                //     bottom: '3%',
-                //     containLabel: true
+                // legend: {
+                //     data:location_list
                 // },
                 visualMap: {
                     max: 11,
@@ -142,21 +136,18 @@
                 },
                 xAxis3D: {
                     type: 'category',
-                    // boundaryGap: ['20%', '20%'],
-                    // axisLabel: {
-                    //     // interval:1,
-                    //     rotate:45
-                    // },
+                    axisLabel: {
+                        interval:0,
+                    },
                 },
                 yAxis3D: {
-                    type: 'category'
+                    type: 'category',
                 },
                 zAxis3D: {
                     type: 'value'
                 },
                 series: {
                     type: 'bar3D',
-                    // symbolSize: symbolSize,
                     shading: 'realistic',
                     encode: {
                         x: 'type',
@@ -174,19 +165,41 @@
                 }
             };
 
-            // //刷新数据
-            // setInterval(function () {
-            //     getData();
-            //     myChart.setOption({
-            //         title: {
-            //         text: '电影类型票房 截至：' + time_str
-            //         },
-            //         xAxis: {
-            //             data: time
-            //         },
-            //         series: chart_data
-            //     });
-            // }, interval_time);
+            //刷新数据
+            setInterval(function () {
+                getData();
+                myChart.setOption({
+                    title: {
+                        text: '电影类型票房 截至：' + time_str
+                    },
+                    dataset: {
+                        dimensions: [
+                            'time',
+                            'type',
+                            'box',
+                            'index',
+                        ],
+                        source: chart_data
+                    },
+                    series: {
+                    type: 'bar3D',
+                    shading: 'realistic',
+                    encode: {
+                        x: 'type',
+                        y: 'time',
+                        z: 'box',
+                        tooltip: [0, 1, 2]
+                    },
+                    label: {
+                        show: false,
+                        textStyle: {
+                            fontSize: 16,
+                            borderWidth: 1
+                        }
+                    },
+                }
+                });
+            }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

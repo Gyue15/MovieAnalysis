@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <title>Director Type</title>
+    <script src="echarts.js"></script>
+    <script src="echarts-gl.js"></script>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="thems/shine.js"></script>
+</head>
+
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1400px;height:800px;"></div>
+    
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'), 'shine');
+        var barWidth = 30;
+        
+        var director_list = ['吴京', '周星驰', '饺子', '郭帆', '陈思诚', '宁浩', '冯小刚', '徐峥', '徐克', '王晶', '李仁港'];
+        var type_list = ['战争', '动作', '喜剧', '动画', '科幻', '动作', '剧情', '爱情'];
+        var chart_data = [];
+        var time_str = "";
+        var interval_time = 800;
+        var max_box = 0;
+        getData(picInit);       
+        
+        var option;
+        
+        function getData(callback){
+            jQuery.ajax({
+                url: "http://localhost:8888/director_type_box", //url 必须写在这里 不然chrome会报CORS error
+                type: "get",
+                dataType: "text",
+                async: true,
+                error : function(req, message) {
+                    alert(JSON.stringify(req) + message);
+                },
+                success: function(ret){
+                    var data = JSON.parse(ret);
+                    if (data.length > 0) {
+                        time_str = data[data.length - 1].time;
+                    }
+                    chart_data = [["director", 'type', 'box', 'index']]
+                    for (var i = 0; i < data.length; i++) {
+                        if (director_list.indexOf(data[i]['_id']['director']) > -1 && type_list.indexOf(data[i]['_id']['type']) > -1) {
+                            chart_data.push([data[i]['_id']['director'], data[i]['_id']['type'], data[i]['total_box'], director_list.indexOf(data[i]['_id']['director'])]);
+                        }
+                    }
+                    console.log(chart_data)
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                }
+            });
+        }
+
+        function picInit(){
+            option = {
+                title: {
+                    text: '导演-类型-票房 截至：' + time_str
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {},
+                    },
+                },
+                dataset: {
+                    dimensions: [
+                        'director',
+                        'type',
+                        'box',
+                        'index'
+                    ],
+                    source: chart_data
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'cross'       
+                    }
+                },
+                //图例
+                // grid: {
+                //     left: '3%',
+                //     right: '4%',
+                //     bottom: '3%',
+                //     containLabel: true
+                // },
+                visualMap: {
+                    max: 11,
+                    dimension: 'index',
+                    inRange: {
+                        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    }
+                },
+                grid3D: {
+                    boxWidth: 100,
+                    boxDepth: 100,
+                },
+                xAxis3D: {
+                    type: 'category',
+                    // boundaryGap: ['20%', '20%'],
+                    axisLabel: {
+                        interval:0,
+                        // rotate:45
+                    },
+                    
+                },
+                yAxis3D: {
+                    type: 'category',
+                    axisLabel: {
+                        interval:0,
+                        // rotate:45
+                    },
+                },
+                zAxis3D: {
+                    type: 'value'
+                },
+                series: {
+                    type: 'bar3D',
+                    // symbolSize: symbolSize,
+                    shading: 'realistic',
+                    encode: {
+                        x: 'type',
+                        y: 'director',
+                        z: 'box',
+                        tooltip: [0, 1, 2]
+                    },
+                    label: {
+                        show: false,
+                        textStyle: {
+                            fontSize: 16,
+                            borderWidth: 1
+                        }
+                    },
+                }
+            };
+
+            // //刷新数据
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '电影类型票房 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: chart_data
+            //     });
+            // }, interval_time);
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+       }
+
+    </script>
+</body>
+</html>

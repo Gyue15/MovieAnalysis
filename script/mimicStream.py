@@ -9,7 +9,7 @@ from config import *
 import random
 
 
-collection, hdfs_client, hdfs_path = Config.get_config(conf=Config.gyue_conf, stream_type=StreamType.AREA)
+collection, hdfs_client, hdfs_path = Config.get_config(conf=Config.gyue_conf, stream_type=StreamType.FILM)
 
 pattern = '%Y-%m-%d'
 beginStr = "2011-11-01"

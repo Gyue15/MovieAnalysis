@@ -19,8 +19,8 @@
         var barWidth = 30;
         
         var time = [];
-        var location_dict = {"剧情": [], "冒险": [], "犯罪": [], "惊悚": [], "悬疑": [], "动画": [], "动作": [], "科幻": [], "战争": [], '爱情': [], "喜剧": []};
-        var location_list = ["剧情", "冒险", "犯罪", "惊悚", "悬疑", "动画", "动作", "科幻", "战争", '爱情', "喜剧"];
+        var location_dict = {"剧情": [], "犯罪": [], "动画": [], "动作": [], "科幻": [], '爱情': [], "喜剧": []};
+        var location_list = ["剧情", "犯罪", "动画", "动作", "科幻", '爱情', "喜剧"];
         var chart_data = [];
         var time_str = "";
         var interval_time = 800;
@@ -38,7 +38,7 @@
                     alert(JSON.stringify(req) + message);
                 },
                 success: function(ret){
-                    location_dict = {"剧情": [], "冒险": [], "犯罪": [], "惊悚": [], "悬疑": [], "动画": [], "动作": [], "科幻": [], "战争": [], '爱情': [], "喜剧": []};
+                    location_dict = {"剧情": [], "犯罪": [], "动画": [], "动作": [], "科幻": [], '爱情': [], "喜剧": []};
                     time = [];
                     var data = JSON.parse(ret);
                     console.log(data);
@@ -90,11 +90,6 @@
             option = {
                 title: {
                     text: '电影类型票房 截至：' + time_str
-                },
-                toolbox: {
-                    feature: {
-                        saveAsImage: {},
-                    },
                 },
                 tooltip: {
                     trigger: 'axis',

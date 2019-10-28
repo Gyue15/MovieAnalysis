@@ -52,6 +52,73 @@ const film_box =  function(callback){
 
 }
 
+
+const director_type_box =  function(callback){
+    const client = new MongoClient(url, {useNewUrlParser:true});
+    client.connect(function(err) {
+        assert.equal(null, err);
+        const db = client.db(dbName);
+        //该图对应的collection
+
+        // 以下代码根据不同功能重新实现
+        const collection = db.collection('uptonow_box_per_director_per_type');
+
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$group': {
+                    '_id': {'director': '$director', 'type': '$type'},
+                    'time': {'$first': '$time'},
+                    'total_box': {'$first': '$total_box'},
+                }
+            }, {
+                '$sort': {
+                    'total_box': -1
+                }
+            }
+        ]).toArray(function(err, docs) {
+            assert.equal(err, null);
+            callback(docs);
+            client.close();
+        });
+    });
+
+}
+
+const actor_type_box =  function(callback){
+    const client = new MongoClient(url, {useNewUrlParser:true});
+    client.connect(function(err) {
+        assert.equal(null, err);
+        const db = client.db(dbName);
+        //该图对应的collection
+
+        // 以下代码根据不同功能重新实现
+        const collection = db.collection('uptonow_box_per_actor_per_type');
+
+        collection.aggregate([
+            {
+                '$sort': {'time': -1}
+            }, {
+                '$group': {
+                    '_id': {'actor': '$actor', 'type': '$type'},
+                    'time': {'$first': '$time'},
+                    'total_box': {'$first': '$total_box'},
+                }
+            }, {
+                '$sort': {
+                    'total_box': -1
+                }
+            }
+        ]).toArray(function(err, docs) {
+            assert.equal(err, null);
+            callback(docs);
+            client.close();
+        });
+    });
+
+}
+
 // 图2 柱图 该月 电影类型 数据   
 //type_box（type相同时返回time最大的数据），图2
 //      先根据type进行查找，type唯一且time最大； 再在子集合中选取total_month_box最大
@@ -117,6 +184,7 @@ const total_box =  function(callback){
         });
     });
 }
+
 
 // 图4  线图  产地票房变化数据   百分比
 // @docs：  
@@ -239,6 +307,12 @@ const myParseUrl = function(url,callback){
         case "actor_box":
            actor_box(function(ret){callback(ret);});
            break;
+        case "director_type_box":
+            director_type_box(function(ret){callback(ret);});
+            break;
+        case "actor_type_box":
+            actor_type_box(function(ret){callback(ret);});
+            break;
     }
     
 }
