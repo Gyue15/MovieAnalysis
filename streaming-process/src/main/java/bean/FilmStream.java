@@ -14,11 +14,13 @@ public class FilmStream implements Serializable {
     String location;
     List<String> actors;
     List<String> type;
+    String director;
+
 
     public FilmStream() {
     }
 
-    public FilmStream(String time, String movieName, long totalBox, long onlineBox, String location, List<String> actors, List<String> type) {
+    public FilmStream(String time, String movieName, long totalBox, long onlineBox, String location, List<String> actors, List<String> type, String director) {
         this.time = time;
         this.movieName = movieName;
         this.totalBox = totalBox;
@@ -26,6 +28,7 @@ public class FilmStream implements Serializable {
         this.location = location;
         this.actors = actors;
         this.type = type;
+        this.director = director;
     }
 
     public FilmStream(FilmStream filmStream) {
@@ -36,6 +39,7 @@ public class FilmStream implements Serializable {
         this.location = filmStream.location;
         this.actors = filmStream.actors;
         this.type = filmStream.type;
+        this.director = filmStream.director;
     }
 
     public String getTime() {
@@ -92,5 +96,13 @@ public class FilmStream implements Serializable {
 
     public void setType(List<String> type) {
         this.type = type;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
     }
 }
