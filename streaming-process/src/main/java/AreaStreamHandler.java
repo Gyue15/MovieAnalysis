@@ -23,6 +23,7 @@ public class AreaStreamHandler {
     private static void handleStream(JavaSparkContext sparkContext) {
         JavaStreamingContext streamingContext = new JavaStreamingContext(sparkContext, Durations.seconds(1));
         JavaDStream<String> contentList = streamingContext.textFileStream("streamInput/area/");
+        //计算每个省份的每月票房
         JavaPairDStream<String, AreaStream> boxPerAreaPerMonth = contentList
                 .flatMap(content -> {
                     JSONArray jsonArray = JSONArray.parseArray(content);

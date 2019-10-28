@@ -28,6 +28,7 @@ import java.util.*;
  */
 public class FilmStreamHandler {
 
+    //更新全局变量
     private static Optional<Tuple3<Long, Long, String>> updateState(List<Tuple3<Long, Long, String>> currentValues,
     Optional<Tuple3<Long, Long, String>> state) {
         long online = 0;
@@ -84,6 +85,7 @@ public class FilmStreamHandler {
 
     }
 
+    //计算每月电影票房，并做缓存
     private static JavaPairDStream<String, Tuple2<Long, Long>> computeBoxPerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "total_box");
@@ -112,6 +114,7 @@ public class FilmStreamHandler {
 
     }
 
+    //计算每月每个产地的电影票房占比
     private static void computeLocationRatePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext, JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth) {
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "location_box");
@@ -153,6 +156,7 @@ public class FilmStreamHandler {
         );
     }
 
+    //计算每月每种类型的电影票房
     private static void computeBoxPerTypePerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "type_box");
@@ -217,6 +221,7 @@ public class FilmStreamHandler {
 
     }
 
+    //计算每部电影每月的票房，并做缓存
     private static JavaPairDStream<String, FilmStream> computeBoxPerFilmPerMonth(JavaPairDStream<String, FilmStream> perFilmPerMonth,JavaSparkContext sparkContext) {
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "film_box_per_month");
@@ -247,6 +252,7 @@ public class FilmStreamHandler {
         return boxPerFilmPerMonth;
     }
 
+    //计算每个导演每种类型电影的每月票房
     private static void computeBoxPerDirectorPerType(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext){
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "uptonow_box_per_director_per_type");
@@ -282,6 +288,7 @@ public class FilmStreamHandler {
         });
     }
 
+    //计算每月前三票房和和其他排名票房和
     private static void computeTop3PerMonth(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth,JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth,JavaSparkContext sparkContext){
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "box_top3_per_month");
@@ -317,6 +324,7 @@ public class FilmStreamHandler {
 
     }
 
+    //计算每一个演员每种类型电影的每月票房
     private static void computeBoxPerActorPerType(JavaPairDStream<String, FilmStream> boxPerFilmPerMonth, JavaSparkContext sparkContext){
         Map<String, String> writeOverrides = new HashMap<>();
         writeOverrides.put("collection", "uptonow_box_per_actor_per_type");
@@ -354,6 +362,7 @@ public class FilmStreamHandler {
     }
 
     private static void receiveStream(JavaSparkContext sparkContext) {
+        //监听流输入，并解析hdfs文件，做数据预处理
         JavaStreamingContext streamingContext = new JavaStreamingContext(sparkContext, Durations.seconds(1));
         JavaDStream<String> contentList = streamingContext.textFileStream("streamInput/film");
         streamingContext.checkpoint("checkPoint/");
@@ -376,14 +385,23 @@ public class FilmStreamHandler {
                             return new Tuple2<>(filmStream.getMovieName(), filmStream);
                         }
                 );
+        //计算每部电影每月的票房，并做缓存
         JavaPairDStream<String, FilmStream> boxPerFilmPerMonth = computeBoxPerFilmPerMonth(perFilmPerMonth,sparkContext);
+        //无用
         computeBoxPerFilm(boxPerFilmPerMonth, sparkContext);
+        //计算每月每种类型的电影票房
         computeBoxPerTypePerMonth(boxPerFilmPerMonth, sparkContext);
+        //计算每月电影票房，并做缓存
         JavaPairDStream<String, Tuple2<Long, Long>> boxPerMonth = computeBoxPerMonth(boxPerFilmPerMonth, sparkContext);
+        //计算每月每个产地的电影票房占比
         computeLocationRatePerMonth(boxPerFilmPerMonth, sparkContext, boxPerMonth);
+        //无用
         computeActorPerYear(boxPerFilmPerMonth, sparkContext);
+        //计算每个导演每种类型电影的每月票房
         computeBoxPerDirectorPerType(boxPerFilmPerMonth,sparkContext);
+        //计算每一个演员每种类型电影的每月票房
         computeBoxPerActorPerType(boxPerFilmPerMonth,sparkContext);
+        //计算每月前三票房和和其他排名票房和
         computeTop3PerMonth(boxPerFilmPerMonth,boxPerMonth,sparkContext);
         streamingContext.start();              // Start the computation
         try {
