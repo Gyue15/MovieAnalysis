@@ -67,30 +67,35 @@ const type_box =  function(callback){
         // 以下代码根据不同功能重新实现
         const collection = db.collection('type_box');
         
-        var newestDate;
-        collection.aggregate([
-            {
-                '$sort': {'time': -1}
-            }, {
-                '$limit': 1    
-            }
-        ]).toArray(function(err, docs) {
+        // var newestDate;
+        // collection.aggregate([
+        //     {
+        //         '$sort': {'time': -1}
+        //     }, {
+        //         '$limit': 1
+        //     }
+        // ]).toArray(function(err, docs) {
+        //     assert.equal(err, null);
+        //     newestDate = docs.length > 0 ?  docs[0].time : '';
+        //     collection.aggregate([
+        //         {
+        //             '$match': {'time':{'$gte': newestDate}}
+        //         },
+        //         {
+        //         '$sort': {'total_month_box': -1}
+        //         }, {
+        //             '$limit': 20    //前20条
+        //         }
+        //     ]).toArray(function(err, docs) {
+        //         assert.equal(err, null);
+        //         callback(docs);
+        //         client.close();
+        //     });
+        // });
+        collection.find().sort({"time": 1}).toArray(function(err, docs) {
             assert.equal(err, null);
-            newestDate = docs.length > 0 ?  docs[0].time : '';
-            collection.aggregate([
-                {
-                    '$match': {'time':{'$gte': newestDate}}
-                },
-                {
-                '$sort': {'total_month_box': -1}
-                }, {
-                    '$limit': 20    //前20条
-                }
-            ]).toArray(function(err, docs) {
-                assert.equal(err, null);
-                callback(docs);
-                client.close();
-            });
+            callback(docs);
+            client.close();
         });
     });
 }

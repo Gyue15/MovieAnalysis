@@ -5,13 +5,14 @@
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <title>Type</title>
     <script src="echarts.js"></script>
+    <script src="echarts-gl.js"></script>
     <script src="jquery-3.4.1.min.js"></script>
     <script src="thems/shine.js"></script>
 </head>
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1400px;height:500px;"></div>
+    <div id="main" style="width: 1400px;height:600px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
@@ -24,6 +25,7 @@
         var chart_data = [];
         var time_str = "";
         var interval_time = 800;
+        var max_box = 0;
         getData(picInit);       
         
         var option;
@@ -41,18 +43,20 @@
                     location_dict = {"剧情": [], "冒险": [], "犯罪": [], "惊悚": [], "悬疑": [], "动画": [], "动作": [], "科幻": [], "战争": [], '爱情': [], "喜剧": []};
                     time = [];
                     var data = JSON.parse(ret);
-                    console.log(data);
+                    // console.log(data);
                     if (data.length > 0) {
                         time_str = data[data.length - 1].time;
                     }
                     var last_time = '-';
                     var now_time = '--';
                     var len = 0
+                    max_box = 0
                     for(var i = 0; i<data.length; i++){
                         now_time =  data[i].time;
                         region = data[i]['type'];
                         if (location_list.indexOf(region) >= 0) {
                             location_dict[region].push(data[i]['total_month_box']);
+                            max_box = data[i]['total_month_box'] > max_box ? data[i]['total_month_box'] : max_box;
                         }
                         if (now_time != last_time) {
                             len++;
@@ -65,17 +69,21 @@
                             }
                         }
                     }
-                    console.log(location_dict);
-                    chart_data = [];
-                    for (var i = 0; i < location_list.length; i++) {
-                        chart_data.push({
-                            name:location_list[i],
-                            type:'line',
-                            data:location_dict[location_list[i]],
-                            hoverAnimation: false,
-                            showSymbol: false,
-                            // smooth: true
-                        });
+                    // console.log(location_dict);
+                    chart_data = [["time", "type", "box", "index"]];
+                    // for (var i = 0; i < location_list.length; i++) {
+                    //     chart_data.push({
+                    //         name:location_list[i],
+                    //         type:'line',
+                    //         data:location_dict[location_list[i]],
+                    //         hoverAnimation: false,
+                    //         showSymbol: false,
+                    //     });
+                    // }
+                    for (var i = 0; i <= len; i++) {
+                        for (var j = 0; j < location_list.length; j++) {
+                            chart_data.push([time[i], location_list[j], location_dict[location_list[j]][i], j]);
+                        }
                     }
                     console.log(chart_data);
                     if(typeof callback == "function"){
@@ -96,6 +104,15 @@
                         saveAsImage: {},
                     },
                 },
+                dataset: {
+                    dimensions: [
+                        'time',
+                        'type',
+                        'box',
+                        'index',
+                    ],
+                    source: chart_data
+                },
                 tooltip: {
                     trigger: 'axis',
                     axisPointer : {            // 坐标轴指示器，坐标轴触发有效
@@ -106,40 +123,70 @@
                 legend: {
                     data:location_list
                 },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
+                // grid: {
+                //     left: '3%',
+                //     right: '4%',
+                //     bottom: '3%',
+                //     containLabel: true
+                // },
+                visualMap: {
+                    max: 11,
+                    dimension: 'index',
+                    inRange: {
+                        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    }
                 },
-                xAxis: {
+                grid3D: {
+                    boxWidth: 80,
+                    boxDepth: 200,
+                },
+                xAxis3D: {
                     type: 'category',
-                    boundaryGap: ['20%', '20%'],
-                    data: time,
-                    axisLabel: {
-                        // interval:1,
-                        rotate:45
+                    // boundaryGap: ['20%', '20%'],
+                    // axisLabel: {
+                    //     // interval:1,
+                    //     rotate:45
+                    // },
+                },
+                yAxis3D: {
+                    type: 'category'
+                },
+                zAxis3D: {
+                    type: 'value'
+                },
+                series: {
+                    type: 'bar3D',
+                    // symbolSize: symbolSize,
+                    shading: 'realistic',
+                    encode: {
+                        x: 'type',
+                        y: 'time',
+                        z: 'box',
+                        tooltip: [0, 1, 2]
                     },
-                },
-                yAxis: {
-                    type: 'value'           
-                },
-                series: chart_data
+                    label: {
+                        show: false,
+                        textStyle: {
+                            fontSize: 16,
+                            borderWidth: 1
+                        }
+                    },
+                }
             };
 
-            //刷新数据
-            setInterval(function () {
-                getData();
-                myChart.setOption({
-                    title: {
-                    text: '电影类型票房 截至：' + time_str
-                    },
-                    xAxis: {
-                        data: time
-                    },
-                    series: chart_data
-                });
-            }, interval_time);
+            // //刷新数据
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '电影类型票房 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: chart_data
+            //     });
+            // }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

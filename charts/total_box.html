@@ -11,12 +11,12 @@
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1400px;height:800px;"></div>
+    <div id="main" style="width: 1400px;height:400px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'), 'shine');
-        var barWidth = 30;
+        var barWidth = 8;
         
         var time = [];
         var total_month_box = [];
@@ -57,6 +57,11 @@
 
         function picInit(){
             option = {
+                toolbox: {
+                    feature: {
+                        saveAsImage: {},
+                    },
+                },
                 title: {
                     text: '票房大盘 截至：' + time_str
                 },
@@ -89,53 +94,55 @@
                     type: 'value'           
                 },
                 series: [
-                    
                     {
                         name:'总票房',
-                        type:'line',
+                        type:'bar',
+                        barGap: '-100%',
+                        barWidth:barWidth,
                         data:total_month_box,
                         hoverAnimation: false,
                         showSymbol: false,
                     },
                     {
                         name:'网票票房',
-                        type:'line',
+                        type:'bar',
+                        barWidth:barWidth,
                         data:online_month_box,
                         hoverAnimation: false,
                         showSymbol: false,
-                    }
+                    },
                 ]
             };
 
             //刷新数据
-            setInterval(function () {
-                getData();
-                myChart.setOption({
-                    title: {
-                    text: '票房大盘 截至：' + time_str
-                    },
-                    xAxis: {
-                        data: time
-                    },
-                    series: [
-                        {
-                            name:'总票房',
-                            type:'line',
-                            data:total_month_box,
-                            hoverAnimation: false,
-                            showSymbol: false,
-                        },
-                        {
-                            name:'网票票房',
-                            type:'line',
-                            data:online_month_box,
-                            hoverAnimation: false,
-                            showSymbol: false,
-                        }
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '票房大盘 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: [
+            //             {
+            //                 name:'总票房',
+            //                 type:'line',
+            //                 data:total_month_box,
+            //                 hoverAnimation: false,
+            //                 showSymbol: false,
+            //             },
+            //             {
+            //                 name:'网票票房',
+            //                 type:'line',
+            //                 data:online_month_box,
+            //                 hoverAnimation: false,
+            //                 showSymbol: false,
+            //             }
                         
-                    ]
-                });
-            }, interval_time);
+            //         ]
+            //     });
+            // }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
