@@ -11,19 +11,22 @@
 
 <body>
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
-    <div id="main" style="width: 1400px;height:400px;"></div>
+    <div id="main" style="width: 800px;height:400px;"></div>
     
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'), 'shine');
-        var barWidth = 8;
+        var barWidth = 20;
         
         var time = [];
         var total_month_box = [];
         var online_month_box = [];
+        var online_percent_1 = [];
+        var online_percent_2 = [];
         var time_str = "";
         var interval_time = 800;
-        getData(picInit);       
+        getData(picInit);    
+        var from = '2017-01'   
         
         var option;
         
@@ -41,10 +44,19 @@
                     if (data.length > 0) {
                         time_str = data[data.length - 1].time;
                     }
+                    var index = 0;
                     for(var i = 0;i<data.length;i++){
-                        time[i] = data[i].time;
-                        total_month_box[i] = data[i].total_month_box;
-                        online_month_box[i] = data[i].online_month_box;
+                        if (data[i].time.split('-')[1] != "03" && data[i].time.split('-')[1] != "04") {
+                            if (data[i].time.split('-')[1] == "08" || data[i].time.split('-')[1] == "01") {
+                                online_percent_2.push(data[i].online_month_box / data[i].total_month_box);
+                            }
+                            index++;
+                            continue;
+                        }
+                        time[i - index] = data[i].time;
+                        total_month_box[i - index] = data[i].total_month_box;
+                        online_month_box[i - index] = data[i].online_month_box;
+                        online_percent_1[i - index] = data[i].online_month_box / data[i].total_month_box;
                     }
                     if(typeof callback == "function"){
                         callback();
@@ -57,13 +69,8 @@
 
         function picInit(){
             option = {
-                toolbox: {
-                    feature: {
-                        saveAsImage: {},
-                    },
-                },
                 title: {
-                    text: '票房大盘 截至：' + time_str
+                    text: '票房大盘 3、4月'
                 },
                 tooltip: {
                     trigger: 'axis',
@@ -73,7 +80,7 @@
                 },
                 //图例
                 legend: {
-                    data:['总票房','网票票房']
+                    data:['总票房','网票票房', '非节假日网票占比', '同年节假日网票占比']
                 },
                 grid: {
                     left: '3%',
@@ -90,9 +97,13 @@
                         rotate:45
                     },
                 },
-                yAxis: {
-                    type: 'value'           
-                },
+                yAxis: [{
+                    type: 'value',
+                    name: '票房/月'           
+                },{
+                    type: 'value',
+                    name: '票房占比/月'           
+                }],
                 series: [
                     {
                         name:'总票房',
@@ -102,6 +113,7 @@
                         data:total_month_box,
                         hoverAnimation: false,
                         showSymbol: false,
+                        yAxisIndex: 0,
                     },
                     {
                         name:'网票票房',
@@ -110,42 +122,59 @@
                         data:online_month_box,
                         hoverAnimation: false,
                         showSymbol: false,
+                        yAxisIndex: 0,
+                    },
+                    {
+                        name:'非节假日网票占比',
+                        type:'line',
+                        data:online_percent_1,
+                        hoverAnimation: false,
+                        showSymbol: false,
+                        yAxisIndex: 1,
+                    },
+                    {
+                        name:'同年节假日网票占比',
+                        type:'line',
+                        data:online_percent_2,
+                        hoverAnimation: false,
+                        showSymbol: false,
+                        yAxisIndex: 1,
                     },
                 ]
             };
 
             //刷新数据
-            setInterval(function () {
-                getData();
-                myChart.setOption({
-                    title: {
-                    text: '票房大盘 截至：' + time_str
-                    },
-                    xAxis: {
-                        data: time
-                    },
-                    series: [
-                        {
-                            name:'总票房',
-                            type:'bar',
-                            barGap: '-100%',
-                            barWidth:barWidth,
-                            data:total_month_box,
-                            hoverAnimation: false,
-                            showSymbol: false,
-                        },
-                        {
-                            name:'网票票房',
-                            type:'bar',
-                            barWidth:barWidth,
-                            data:online_month_box,
-                            hoverAnimation: false,
-                            showSymbol: false,
-                        }
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '票房大盘 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: [
+            //             {
+            //                 name:'总票房',
+            //                 type:'bar',
+            //                 barGap: '-100%',
+            //                 barWidth:barWidth,
+            //                 data:total_month_box,
+            //                 hoverAnimation: false,
+            //                 showSymbol: false,
+            //             },
+            //             {
+            //                 name:'网票票房',
+            //                 type:'bar',
+            //                 barWidth:barWidth,
+            //                 data:online_month_box,
+            //                 hoverAnimation: false,
+            //                 showSymbol: false,
+            //             }
                         
-                    ]
-                });
-            }, interval_time);
+            //         ]
+            //     });
+            // }, interval_time);
 
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);

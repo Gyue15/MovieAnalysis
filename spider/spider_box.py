@@ -2,6 +2,7 @@ from requests_html import HTMLSession
 import datetime
 import pymongo
 
+
 class MovieSpider(object):
     def __init__(self):
         self.li_list = ['导演：', '主演：', '片长：', '类型：', '制作国家/地区：']
@@ -20,11 +21,12 @@ class MovieSpider(object):
             '制作国家/地区：': 'location'
         }
         self.unit_list = ["千", "万", "亿"]
-        self.unit_dict = {
+        d = {
             "千": 1000,
             "万": 10000,
             "亿": 100000000
         }
+        self.unit_dict = d
         self.client = pymongo.MongoClient('mongodb://localhost:27017/')
         self.database = self.client["film"]
         self.connection = self.database["film_per_day"]

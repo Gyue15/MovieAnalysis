@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <title>Location</title>
+    <script src="echarts.js"></script>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="thems/shine.js"></script>
+</head>
+
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 800px;height:400px;"></div>
+    
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'), 'shine');
+        var barWidth = 30;
+        
+        var time_cold = [];
+        var time_hot = [];
+        var diff_cold = [];
+        var diff_hot = [];
+        var time = [];
+        var interval_time = 800;
+        getData(picInit);       
+        
+        var option;
+        
+        function getData(callback){
+            jQuery.ajax({
+                url: "http://localhost:8888/location_box", //url 必须写在这里 不然chrome会报CORS error
+                type: "get",
+                dataType: "text",
+                async: true,
+                error : function(req, message) {
+                    alert(JSON.stringify(req) + message);
+                },
+                success: function(ret){
+                    time_cold = [];
+                    time_hot = [];
+                    diff_cold = [];
+                    diff_hot = [];
+                    var china_cold = [];
+                    var china_hot = [];
+                    var usa_cold = [];
+                    var usa_hot = [];
+                    var data = JSON.parse(ret);
+                    // console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i]['time'] > '2017-12' || data[i]['time'] < '2012-01') {
+                            continue;
+                        }
+                        if (data[i]['region'] != "中国大陆" && data[i]['region'] != "美国") {
+                            // console.log(data[i]['region']);
+                            continue;
+                        }
+                        if (data[i]['time'].split('-')[1] === '03' || data[i]['time'].split('-')[1] === '04'
+                        || data[i]['time'].split('-')[1] === '06'|| data[i]['time'].split('-')[1] === '11') {
+                            if (data[i]['region'] === '中国大陆') {
+                                time_cold.push(data[i]['time']);
+                                china_cold.push(data[i]['box_percent']);
+                            } else {
+                                usa_cold.push(data[i]['box_percent']);
+                            }
+                        }
+                        if (data[i]['time'].split('-')[1] === '01' || data[i]['time'].split('-')[1] === '02'
+                        || data[i]['time'].split('-')[1] === '08' || data[i]['time'].split('-')[1] === '10') {
+                            if (data[i]['region'] === '中国大陆') {
+                                time_hot.push(data[i]['time']);
+                                china_hot.push(data[i]['box_percent']);
+                            } else {
+                                usa_hot.push(data[i]['box_percent']);
+                            }
+                        }
+                    }
+                    for (var i = 0; i < time_cold.length; i++) {
+                        diff_cold.push(china_cold[i] - usa_cold[i]);
+                        time.push(time_cold[i].split('-')[0]);
+                    }
+                    for (var i = 0; i < time_hot.length; i++) {
+                        diff_hot.push(china_hot[i] - usa_hot[i]);
+                    }
+                    
+                    console.log(time_cold);
+                    console.log(time_hot);
+                    console.log(diff_cold);
+                    console.log(diff_hot);
+                    console.log(time);
+                    // for (var i = 0; i < location_list.length; i++) {
+                    //     chart_data.push({
+                    //         name:location_list[i],
+                    //         type:'line',
+                    //         data:location_dict[location_list[i]],
+                    //         hoverAnimation: false,
+                    //         showSymbol: false,
+                    //     });
+                    // }
+                    if(typeof callback == "function"){
+                        callback();
+                    }
+                    
+                }
+            });
+        }
+
+        function picInit(){
+            option = {
+                title: {
+                    text: '电影产地票房占比'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+                        type : 'cross'       
+                    }
+                },
+                //图例
+                legend: {
+                    data:['节假日票房', '非节假日票房']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    name: '年份',
+                    boundaryGap: ['20%', '20%'],
+                    data: time,
+                    axisLabel: {
+                        interval:0,
+                        rotate:45
+                    },
+                },
+                yAxis: {
+                    type: 'value' ,
+                    name: '中美票房占比差' ,
+                    min: -1.0,
+                    max: 1.0         
+                },
+                series: [
+                    {
+                            name: '节假日票房',
+                            type:'line',
+                            data: diff_hot,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                    },
+                    {
+                            name: '非节假日票房',
+                            type:'line',
+                            data:diff_cold,
+                            hoverAnimation: false,
+                            showSymbol: false,
+                    },
+                ]
+                
+            }
+            console.log(option)
+            //刷新数据
+            // setInterval(function () {
+            //     getData();
+            //     myChart.setOption({
+            //         title: {
+            //         text: '电影产地票房 截至：' + time_str
+            //         },
+            //         xAxis: {
+            //             data: time
+            //         },
+            //         series: chart_data
+            //     });
+            // }, interval_time);
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+       }
+
+    </script>
+</body>
+</html>
